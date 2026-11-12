@@ -35,6 +35,7 @@ export interface ProfileDocument extends BaseDocument {
   displayName: string;
   role: UserRole;
   isActive: boolean;
+  passwordHash: string;
 }
 
 export interface FarmDocument extends BaseDocument {
@@ -48,6 +49,8 @@ export interface ZoneDocument extends BaseDocument {
   name: string;
   growthPhase?: string;
   isActive: boolean;
+  assignedUserIds: string[];
+  controlUserIds: string[];
 }
 
 export interface DeviceDocument extends BaseDocument {

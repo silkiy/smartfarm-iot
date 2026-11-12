@@ -14,6 +14,7 @@ Copy `.env.example` to `.env.local`, lalu isi konfigurasi server-only:
 
 ```env
 MONGODB_URI=mongodb+srv://...
+AUTH_SECRET=generate-a-long-random-secret
 ```
 
 Nama database diambil dari bagian path pada URI (`/.../smartfarm`). `MONGODB_DB`
@@ -28,6 +29,18 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+## Authentication
+
+Authentication uses Auth.js Credentials with bcrypt password hashes. To create the first
+administrator, set the `ADMIN_BOOTSTRAP_*` variables in `.env.local` and run:
+
+```bash
+npm run bootstrap:admin
+```
+
+Remove or clear the bootstrap password after the command succeeds. The login endpoints
+are served by `/api/auth/*`; profile role and resource authorization are checked server-side.
 
 ## Database API foundation
 
