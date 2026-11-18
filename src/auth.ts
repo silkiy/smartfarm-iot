@@ -1,39 +1,25 @@
 import "server-only";
-import { credentialsSchema } from "@/domain/users";
-import { verifyPassword } from "@/server/auth/passwords";
-import { findProfileByEmail } from "@/server/auth/users";
+import { authenticateCredentials } from "@/server/auth/login";
+
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  session: { strategy: "jwt" },
+  logger: {
+    error(error) {
+      if (error.name !== "CredentialsSignin")
+        console.error({ event: "authentication_error", type: error.name });
+    },
+  },
+  pages: { signIn: "/login" },
+  session: { strategy: "jwt", maxAge: 60 * 60 * 8 },
   providers: [
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (rawCredentials) => {
-        const parsed = credentialsSchema.safeParse(rawCredentials);
-        if (!parsed.success) {
-          return null;
-        }
-
-        const profile = await findProfileByEmail(parsed.data.email);
-        if (
-          !profile ||
-          !(await verifyPassword(parsed.data.password, profile.passwordHash))
-        ) {
-          return null;
-        }
-
-        return {
-          id: profile.userId,
-          email: profile.email,
-          name: profile.displayName,
-          role: profile.role,
-        };
-      },
+      authorize: authenticateCredentials,
     }),
   ],
   callbacks: {

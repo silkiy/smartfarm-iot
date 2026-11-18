@@ -22,8 +22,8 @@ function getConfiguration(
     (variable) => !environment[variable]?.trim(),
   );
 
-  if (!enabled && missing.length === requiredVariables.length) {
-    return { status: "NOT_CONFIGURED", missing: requiredVariables };
+  if (!enabled) {
+    return { status: "NOT_CONFIGURED", missing };
   }
 
   if (missing.length > 0) {
@@ -50,9 +50,9 @@ export function getWhatsAppConfiguration(
 export function getWeatherConfiguration(
   environment: Environment = process.env,
 ): ProviderConfiguration {
-  return getConfiguration(
-    "WEATHER_ENABLED",
-    ["WEATHER_API_URL", "WEATHER_LOCATION"],
-    environment,
-  );
+  return {
+    status:
+      environment.WEATHER_ENABLED === "false" ? "NOT_CONFIGURED" : "CONFIGURED",
+    missing: [],
+  };
 }

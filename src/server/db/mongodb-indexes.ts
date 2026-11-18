@@ -6,6 +6,39 @@ export async function ensureDatabaseIndexes(database: Db): Promise<void> {
     database
       .collection(collectionNames.profiles)
       .createIndex(
+        { userId: 1 },
+        { unique: true, name: "profiles_user_id_unique" },
+      ),
+    database
+      .collection(collectionNames.farms)
+      .createIndex(
+        { ownerUserId: 1, archivedAt: 1 },
+        { name: "farms_owner_active" },
+      ),
+    database
+      .collection(collectionNames.zones)
+      .createIndex({ farmId: 1, isActive: 1 }, { name: "zones_farm_active" }),
+    database
+      .collection(collectionNames.zones)
+      .createIndex(
+        { assignedUserIds: 1, isActive: 1 },
+        { name: "zones_worker_active" },
+      ),
+    database
+      .collection(collectionNames.irrigationRules)
+      .createIndex({ zoneId: 1 }, { unique: true, name: "rules_zone_unique" }),
+    database
+      .collection(collectionNames.alerts)
+      .createIndex({ farmId: 1, occurredAt: -1 }, { name: "alerts_farm_time" }),
+    database
+      .collection("auth_attempts")
+      .createIndex(
+        { expiresAt: 1 },
+        { expireAfterSeconds: 0, name: "auth_attempts_expiry" },
+      ),
+    database
+      .collection(collectionNames.profiles)
+      .createIndex(
         { email: 1 },
         { unique: true, name: "profiles_email_unique" },
       ),
