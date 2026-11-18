@@ -2,6 +2,37 @@
 
 Website monitoring dan otomatisasi irigasi berbasis Next.js, MongoDB Atlas, dan ESP32.
 
+## Frontend preview
+
+The six Stitch screens are implemented as native Next.js routes:
+
+| Route         | Screen                                                           |
+| ------------- | ---------------------------------------------------------------- |
+| `/login`      | Login and role preview                                           |
+| `/dashboard`  | Farm overview, soil moisture, water level and actuator state     |
+| `/irigasi`    | Manual irrigation simulation and automatic-rule settings         |
+| `/analisis`   | Sensor charts, date/zone filters, CSV download and print layout  |
+| `/notifikasi` | Alerts, unread filters, preferences and WhatsApp message preview |
+| `/lahan`      | Farm and zone create/edit/delete flows and device information    |
+
+The root route redirects to `/dashboard`. All preview routes are public and use
+deterministic sample data. Login only demonstrates the form flow; it does not
+authenticate, retain a password or call the existing Auth.js API. The role selector
+changes UI availability only and is not an authorization control.
+
+Demo state is shared during client navigation and resets on a full reload. Farm
+and zone edits, notification preferences and automatic-rule settings remain local
+to that session. The irrigation countdown is capped at 15 seconds and continues
+while navigating between preview pages; it never sends a physical device command.
+WhatsApp preview never sends a message. CSV exports are labelled as sample data;
+PDF output is available through the browser's print/save-as-PDF flow.
+
+The layout uses desktop sidebar navigation and mobile bottom navigation, with
+locally hosted Plus Jakarta Sans and photographs from the supplied Stitch export.
+Font licensing is included at `src/app/fonts/OFL.txt`. The existing backend,
+database connection and authentication implementation remain separate from this
+frontend preview and will be integrated in a subsequent change.
+
 ## Getting Started
 
 Install dependencies:
