@@ -47,6 +47,11 @@ public/images/                 Foto lokal yang digunakan frontend
 
 ## Batas server dan client
 
+- Pengalihan tetap `/` ke `/dashboard` menggunakan `redirects()` di
+  `next.config.ts` dengan status sementara 307. Pengalihan ini berjalan sebelum
+  render sehingga tidak memerlukan halaman root atau melempar `NEXT_REDIRECT`
+  saat validasi `instant`. Gunakan `redirect()` pada route yang tujuannya perlu
+  ditentukan saat render, misalnya berdasarkan sesi pengguna.
 - `page.tsx` dan `layout.tsx` tetap Server Components. File tersebut merangkai
   halaman, metadata, dan layout; logika layar berada di folder fitur.
 - Tambahkan `"use client"` pada komponen yang membutuhkan state, event handler,

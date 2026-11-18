@@ -28,6 +28,32 @@ test.afterEach(async ({ page }) => {
   expect(apiRequests.get(page)).toEqual([]);
 });
 
+test("root redirect reaches the dashboard without a render error", async ({
+  page,
+  request,
+}) => {
+  for (const query of ["", "?from=bookmark"]) {
+    const response = await request.get(`/${query}`, { maxRedirects: 0 });
+    expect(response.status()).toBe(307);
+    expect(response.headers().location).toBe(`/dashboard${query}`);
+    expect(await response.text()).not.toContain("NEXT_REDIRECT");
+  }
+
+  const validationErrors: string[] = [];
+  page.on("console", (message) => {
+    if (/Could not validate.*instant/.test(message.text())) {
+      validationErrors.push(message.text());
+    }
+  });
+
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(
+    page.getByRole("heading", { name: "Dashboard lahan", exact: true }),
+  ).toBeVisible();
+  expect(validationErrors).toEqual([]);
+});
+
 for (const width of [320, 375, 768, 1024, 1440, 1920, 2560]) {
   for (const route of routes) {
     test(`${route} fits a ${width}px viewport`, async ({ page }) => {
