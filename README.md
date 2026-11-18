@@ -2,6 +2,12 @@
 
 Website monitoring dan otomatisasi irigasi berbasis Next.js, MongoDB Atlas, dan ESP32.
 
+## Maintenance
+
+Baca [arsitektur proyek](ARCHITECTURE.md) untuk struktur folder dan batas server/client.
+Baca [panduan maintenance](CONTRIBUTING.md) untuk perintah pemeriksaan, test browser,
+dan lokasi perubahan fitur yang umum.
+
 ## Frontend preview
 
 The six Stitch screens are implemented as native Next.js routes:
@@ -29,7 +35,7 @@ PDF output is available through the browser's print/save-as-PDF flow.
 
 The layout uses desktop sidebar navigation and mobile bottom navigation, with
 locally hosted Plus Jakarta Sans and photographs from the supplied Stitch export.
-Font licensing is included at `src/app/fonts/OFL.txt`. The existing backend,
+Font licensing is included at `src/assets/fonts/OFL.txt`. The existing backend,
 database connection and authentication implementation remain separate from this
 frontend preview and will be integrated in a subsequent change.
 
