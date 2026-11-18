@@ -1,4 +1,5 @@
 "use client";
+import { minimumPasswordLength } from "@/domain/password-policy";
 import { Brand } from "@/components/layout/brand";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
@@ -119,8 +120,8 @@ export function Login() {
                   name="password"
                   type={visible ? "text" : "password"}
                   autoComplete="current-password"
-                  placeholder="Minimal 8 karakter"
-                  minLength={8}
+                  placeholder={`Minimal ${minimumPasswordLength} karakter`}
+                  minLength={minimumPasswordLength}
                   required
                 />
                 <button

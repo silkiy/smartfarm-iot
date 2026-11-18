@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { passwordSchema } from "@/domain/users";
 import { AuthorizationError } from "@/server/auth/policy";
 import { hashPassword } from "@/server/auth/passwords";
 import { api, ApiError, input, json } from "@/server/http/api";
@@ -24,12 +25,7 @@ export async function PATCH(
       z
         .object({
           isActive: z.boolean().optional(),
-          password: z
-            .string()
-            .min(12)
-            .max(72)
-            .refine((value) => new TextEncoder().encode(value).length <= 72)
-            .optional(),
+          password: passwordSchema.optional(),
         })
         .strict()
         .refine((v) => v.isActive !== undefined || v.password !== undefined),

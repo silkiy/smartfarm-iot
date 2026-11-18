@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { passwordSchema } from "./users";
 
 export const growthPhaseSchema = z.enum([
   "Vegetatif",
@@ -51,11 +52,7 @@ export const userInputSchema = z
   .object({
     email: z.string().trim().toLowerCase().email().max(254),
     displayName: z.string().trim().min(1).max(80),
-    password: z
-      .string()
-      .min(12)
-      .max(72)
-      .refine((value) => new TextEncoder().encode(value).length <= 72),
+    password: passwordSchema,
     role: z.enum(["ADMIN", "LANDOWNER", "FIELD_WORKER"]),
   })
   .strict();

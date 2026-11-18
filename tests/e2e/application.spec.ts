@@ -52,7 +52,7 @@ test("login shows invalid credentials and accessible help", async ({
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.getByLabel("Alamat email").fill("missing@example.invalid");
-  await page.getByPlaceholder("Minimal 8 karakter").fill("invalid-password");
+  await page.getByPlaceholder("Minimal 9 karakter").fill("invalid-password");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page.getByRole("main").getByRole("alert")).toContainText(
     "tidak valid",
@@ -284,12 +284,22 @@ test.describe("authenticated application", () => {
       page.getByRole("heading", { name: "Belum ada pembacaan sensor" }),
     ).toBeVisible();
   });
-  test("admin creates a user and deactivation invalidates their existing session", async ({
+  test("admin creates a user with nine characters and deactivation invalidates their existing session", async ({
     request,
     playwright,
   }) => {
     const email = `${randomUUID()}@example.invalid`,
-      password = randomUUID() + "Aa!";
+      password = randomUUID().slice(0, 9);
+    const rejected = await request.post("/api/users", {
+      headers: { Origin: base },
+      data: {
+        email,
+        password: password.slice(0, 8),
+        displayName: "Pengguna pengujian",
+        role: "FIELD_WORKER",
+      },
+    });
+    expect(rejected.status()).toBe(422);
     const response = await request.post("/api/users", {
       headers: { Origin: base },
       data: {
@@ -362,7 +372,16 @@ test.describe("authenticated application", () => {
     });
     try {
       await login(ctx, accounts.length - 1);
-      const nextPassword = randomUUID() + "Aa!";
+      const nextPassword = randomUUID().slice(0, 9);
+      expect(
+        (
+          await request.patch(`/api/users/${id}`, {
+            headers: { Origin: base },
+            data: { password: nextPassword.slice(0, 8) },
+          })
+        ).status(),
+      ).toBe(422);
+      expect((await ctx.get("/api/workspace")).status()).toBe(200);
       expect(
         (
           await request.patch(`/api/users/${id}`, {

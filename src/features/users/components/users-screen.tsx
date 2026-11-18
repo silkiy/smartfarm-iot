@@ -1,4 +1,5 @@
 "use client";
+import { minimumPasswordLength } from "@/domain/password-policy";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { requestJson } from "@/lib/api-client";
 import { PageHeading } from "@/components/ui/page-heading";
@@ -108,13 +109,13 @@ export function UsersScreen() {
             <div className="form-grid">
               <Field
                 label="Kata sandi awal"
-                hint="Minimal 12 karakter; berikan secara pribadi."
+                hint="Minimal 9 karakter; berikan secara pribadi."
               >
                 <input
                   name="password"
                   type="password"
                   autoComplete="new-password"
-                  minLength={12}
+                  minLength={minimumPasswordLength}
                   maxLength={72}
                   required
                 />
@@ -190,7 +191,7 @@ export function UsersScreen() {
                   type="password"
                   name="password"
                   required
-                  minLength={12}
+                  minLength={minimumPasswordLength}
                   maxLength={72}
                   autoComplete="new-password"
                 />

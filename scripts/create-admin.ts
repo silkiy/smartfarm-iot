@@ -33,7 +33,7 @@ async function main() {
     let password = process.env.ADMIN_BOOTSTRAP_PASSWORD;
     if (!password) {
       process.stdout.write(
-        "Kata sandi (minimal 12 karakter, tidak ditampilkan): ",
+        "Kata sandi (minimal 9 karakter, tidak ditampilkan): ",
       );
       muted = true;
       password = await terminal.question("");
@@ -61,7 +61,7 @@ async function main() {
     console.log("Akun admin dibuat. Akun yang sudah ada tidak diubah.");
   } catch {
     console.error(
-      "Admin gagal dibuat. Periksa koneksi MongoDB, email unik, dan kata sandi minimal 12 karakter (maksimal 72 byte).",
+      "Admin gagal dibuat. Periksa koneksi MongoDB, email unik, dan kata sandi minimal 9 karakter (maksimal 72 byte).",
     );
     process.exitCode = 1;
   } finally {
