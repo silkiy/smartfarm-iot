@@ -18,9 +18,10 @@ Aplikasi memakai Next.js Route Handlers, Auth.js Credentials/JWT dan MongoDB. Ha
 - Pemilik: lahan sendiri, zona dan aturan pada lahan sendiri, serta penugasan pekerja aktif.
 - Pekerja: hanya zona yang ditugaskan dan lahan induknya. Tidak dapat mengubah lahan/zona/aturan/pengguna.
 - Preferensi dan status baca notifikasi disimpan per akun. Nonaktivasi akun diperiksa ulang di database pada setiap permintaan API, termasuk sesi yang masih memiliki JWT.
+- Reset kata sandi dan penonaktifan menaikkan `sessionVersion` secara atomik. Sesi lama ditolak setelah reset maupun setelah akun diaktifkan kembali; pengguna harus masuk ulang. Profil/JWT lama tanpa versi diperlakukan sebagai versi 0.
 - Penghapusan lahan/zona mengarsipkan data. Riwayat dipertahankan, sementara semua query aktif memeriksa induk yang belum diarsipkan.
 
-Mutation API mewajibkan JSON, sesi aktif, dan Origin yang cocok. `AUTH_URL` menetapkan origin publik ketika berada di belakang reverse proxy. Kredensial database/token tidak pernah diberikan ke browser. Respons data akun memakai `private, no-store`.
+Mutation API mewajibkan sesi aktif dan Origin yang cocok; endpoint yang menerima body mewajibkan JSON dengan batas 16 KiB. `AUTH_URL` menetapkan origin publik ketika berada di belakang reverse proxy. Kredensial database/token tidak pernah diberikan ke browser. Respons data akun memakai `private, no-store`. Parameter `page` harus bilangan bulat 1–100.000; nilai tidak valid atau berulang ditolak dengan 422.
 
 ## Endpoint
 
@@ -56,6 +57,8 @@ Pendaftaran/kredensial perangkat, ingest sensor, kalibrasi, polling/ACK perintah
 
 ## Pengujian
 
+Hasil audit dan batas verifikasi terakhir tersedia pada [AUDIT.md](AUDIT.md).
+
 ```powershell
 npm run check
 npm run build
@@ -65,6 +68,8 @@ npm run test:e2e
 ```
 
 Gunakan database pengujian khusus bernama `smartfarm_test_*`. Suite menyiapkan akun/data pengujian dan membersihkan dokumen yang dibuatnya. Jangan menunjuk database aplikasi utama. Server E2E memakai URI pengujian, `MONGODB_DB` yang sesuai, dan secret acak sendiri. Tutup server dev proyek sebelum membiarkan Playwright menjalankan server dev pengujian pada port 3120; framework mengunci satu server dev per direktori.
+
+Server yang dijalankan suite menetapkan `AUTH_URL` sesuai alamat pengujian dan mematikan provider cuaca/WhatsApp. Bila memakai `PLAYWRIGHT_BASE_URL`, jalankan server pengujian tersebut dengan `WHATSAPP_ENABLED=false` dan `WEATHER_ENABLED=false`; suite tidak mengirim pesan nyata. Pengujian API cuaca langsung dilakukan terpisah.
 
 Untuk menguji build produksi yang sudah berjalan dengan database pengujian yang sama, isi `PLAYWRIGHT_BASE_URL`, misalnya `http://127.0.0.1:3130`; suite tidak menjalankan server kedua. Jangan memakai URL produksi pengguna sungguhan. Browser Chromium/Chrome diperlukan. Hasil berada di `test-results/` dan `playwright-report/`, keduanya diabaikan Git.
 

@@ -61,6 +61,12 @@ public/images/                 Foto lokal yang digunakan frontend
   WorkspaceProvider memuat snapshot dari API, menunggu hasil mutation sebelum
   memperbarui state, dan mengarahkan sesi yang tidak valid kembali ke login.
   Tidak ada selector peran atau penyimpanan data pribadi di localStorage.
+- Keenam halaman privat mendeklarasikan `instant = false` karena menunggu data
+  akun pada provider. Deklarasi layout tidak menggantikan validasi implicit tiap
+  page pada versi Next.js ini. Cache Components dan Partial Prefetching tetap aktif;
+  halaman login tetap memakai validasi bawaan.
+- Boundary sesi memanggil `connection()` di dalam Suspense sebelum Auth.js agar
+  kriptografi autentikasi berjalan pada request pengguna, bukan saat prerender.
 - `src/auth.ts` ditandai `server-only`. ESLint melarang komponen UI dan fitur
   mengimpor `@/server/**` atau `@/auth`. Tipe/data domain yang benar-benar dapat
   dibagi tetap berada di `domain/`.
