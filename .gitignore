@@ -45,6 +45,7 @@ docs
 tasks
 prd
 agents.md
+design
 
 # Browser test artifacts
 /playwright-report/
