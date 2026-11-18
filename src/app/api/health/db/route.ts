@@ -1,4 +1,4 @@
-import { getMongoDatabase } from "@/lib/mongodb";
+import { getMongoDatabase } from "@/server/db/mongodb";
 
 export async function GET() {
   try {

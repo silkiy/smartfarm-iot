@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Brand } from "@/components/smartfarm/app-shell";
+import { Brand } from "@/components/layout/brand";
 
 export default function NotFound() {
   return (

@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   getWeatherConfiguration,
   getWhatsAppConfiguration,
-} from "../src/services/providers/config";
+} from "../src/server/integrations/config";
 
 describe("provider configuration", () => {
   it("keeps providers disabled when credentials are absent", () => {
