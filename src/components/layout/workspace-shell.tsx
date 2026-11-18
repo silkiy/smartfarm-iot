@@ -1,10 +1,10 @@
 "use client";
 import styles from "@/components/layout/workspace.module.css";
 import { Dialog } from "@/components/ui/dialog";
-import { Field } from "@/components/ui/field";
+import { signOut } from "next-auth/react";
 import { Icon, type IconName } from "@/components/ui/icon";
-import { useDemo } from "@/features/demo/demo-provider";
-import type { DemoRole } from "@/features/demo/types";
+import { useWorkspace } from "@/features/workspace/workspace-provider";
+
 import { cn } from "@/lib/cn";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -25,7 +25,13 @@ const navigation: {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [profileOpen, setProfileOpen] = useState(false);
-  const { role, setRole, notices, runningZone, remaining } = useDemo();
+  const { role, notices, user } = useWorkspace();
+  const initials = user.name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
   const unread = notices.filter((item) => !item.read).length;
   return (
     <div className={styles["app-shell"]}>
@@ -65,10 +71,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               ⌁
             </span>
           </div>
-          <Link href="/login" className={styles["nav-link"]}>
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className={styles["nav-link"]}
+          >
             <Icon name="logout" />
-            Keluar dari demo
-          </Link>
+            Keluar
+          </button>
           <div className={styles["sidebar-footer"]}>
             SmartFarm IoT · Prototipe MPTI
           </div>
@@ -88,7 +98,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className={styles["topbar-actions"]}>
             <span className="demo-tag">
               <span className="status-dot" />
-              Mode demo
+              Akun terhubung
             </span>
             <Link
               href="/notifikasi"
@@ -101,22 +111,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className={styles["profile"]}>
               <button
                 className={styles["avatar"]}
-                aria-label="PS: buka profil demo"
+                aria-label="Buka profil"
                 onClick={() => setProfileOpen(true)}
               >
-                PS
+                {initials}
               </button>
               <label className={styles["profile-label"]}>
-                <span>Pak Supadi</span>
-                <select
-                  aria-label="Pratinjau peran"
-                  value={role}
-                  onChange={(event) => setRole(event.target.value as DemoRole)}
-                >
-                  <option>Pemilik lahan</option>
-                  <option>Admin</option>
-                  <option>Pekerja lapangan</option>
-                </select>
+                <span>{user.name}</span>
+                <span>{role}</span>
               </label>
             </div>
           </div>
@@ -125,14 +127,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className={styles["demo-strip"]}>
             <Icon name="info" size={16} />
             <span>
-              Pratinjau dengan data contoh. Perubahan berlaku selama sesi demo.
+              Pengelolaan lahan sudah tersedia. Pembacaan sensor dan kendali
+              irigasi menunggu perangkat.
             </span>
-            {runningZone && (
-              <Link href="/irigasi" className={styles["demo-running"]}>
-                Irigasi simulasi · {remaining} dtk{" "}
-                <Icon name="arrow" size={15} />
-              </Link>
-            )}
           </div>
           {children}
           <footer className={styles["content-footer"]}>
@@ -160,40 +157,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         ))}
       </nav>
       {profileOpen && (
-        <Dialog title="Profil demo" onClose={() => setProfileOpen(false)}>
+        <Dialog title="Profil akun" onClose={() => setProfileOpen(false)}>
           <p>
-            Pak Supadi · Akun contoh. Pilih peran untuk meninjau tampilan dan
-            ketersediaan kontrol.
+            <strong>{user.name}</strong>
           </p>
-          <Field label="Pratinjau peran">
-            <select
-              value={role}
-              onChange={(event) => setRole(event.target.value as DemoRole)}
+          <p>{user.email}</p>
+          <p>{role}</p>
+          {user.role !== "FIELD_WORKER" && (
+            <Link
+              className="button button-secondary full-width"
+              href="/pengguna"
+              onClick={() => setProfileOpen(false)}
             >
-              <option>Pemilik lahan</option>
-              <option>Admin</option>
-              <option>Pekerja lapangan</option>
-            </select>
-          </Field>
+              Pengguna & penugasan
+            </Link>
+          )}
           <button
             className="button button-primary full-width"
-            onClick={() => setProfileOpen(false)}
+            onClick={() => signOut({ callbackUrl: "/login" })}
           >
-            Selesai
+            Keluar dari akun
           </button>
-          <Link
-            href="/login"
-            className={cn(
-              "button",
-              "button-secondary",
-              "full-width",
-              styles["profile-exit"],
-            )}
-            onClick={() => setProfileOpen(false)}
-          >
-            <Icon name="logout" size={17} />
-            Kembali ke halaman masuk
-          </Link>
         </Dialog>
       )}
     </div>

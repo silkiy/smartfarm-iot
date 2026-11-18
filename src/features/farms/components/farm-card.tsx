@@ -1,7 +1,7 @@
 "use client";
 import { Icon } from "@/components/ui/icon";
-import { useDemo } from "@/features/demo/demo-provider";
-import type { Farm } from "@/features/demo/types";
+import { useWorkspace } from "@/features/workspace/workspace-provider";
+import type { Farm } from "@/features/workspace/types";
 import { cn } from "@/lib/cn";
 import Image from "next/image";
 import styles from "../farms.module.css";
@@ -16,7 +16,7 @@ export function FarmCard({
   farmIndex: number;
   setEditor: (editor: FarmEditor) => void;
 }) {
-  const { zones, role, farmId, setFarmId, notify } = useDemo();
+  const { zones, role, farmId, setFarmId, notify } = useWorkspace();
   const readonly = role === "Pekerja lapangan";
   const farmZones = zones.filter((zone) => zone.farmId === farm.id);
   return (
@@ -115,7 +115,7 @@ export function FarmCard({
                   >
                     <span className="status-dot" />
                     {zone.online
-                      ? "Perangkat contoh aktif"
+                      ? "Perangkat aktif"
                       : "Terputus / belum terhubung"}
                   </span>
                 </div>
@@ -159,7 +159,7 @@ export function FarmCard({
         <div className={styles["farm-card-footer"]}>
           <span className="muted">
             <Icon name="shield" size={14} />
-            {readonly ? "Pemantauan zona" : "Lahan Pak Supadi"}
+            {readonly ? "Pemantauan zona" : "Lahan terdaftar"}
           </span>
           <button
             className="text-link"

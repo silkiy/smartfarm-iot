@@ -4,8 +4,8 @@ import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import styles from "@/features/auth/auth.module.css";
-import { useDemo } from "@/features/demo/demo-provider";
-import type { DemoRole } from "@/features/demo/types";
+import { signIn } from "next-auth/react";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,13 +15,36 @@ export function Login() {
   const [visible, setVisible] = useState(false);
   const [help, setHelp] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { role, setRole } = useDemo();
+  const [error, setError] = useState("");
   const router = useRouter();
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = new FormData(event.currentTarget);
     setLoading(true);
-    event.currentTarget.reset();
-    router.push("/dashboard");
+    setError("");
+    try {
+      const result = await signIn("credentials", {
+        email: form.get("email"),
+        password: form.get("password"),
+        redirect: false,
+      });
+      if (result?.error)
+        setError(
+          result.error === "CredentialsSignin"
+            ? "Email atau kata sandi tidak valid, atau akun belum aktif."
+            : "Layanan masuk belum tersedia. Silakan coba lagi atau hubungi administrator.",
+        );
+      else {
+        router.replace("/dashboard");
+        router.refresh();
+      }
+    } catch {
+      setError(
+        "Layanan masuk belum tersedia. Silakan coba lagi atau hubungi administrator.",
+      );
+    } finally {
+      setLoading(false);
+    }
   }
   return (
     <main className={styles["login-page"]}>
@@ -67,7 +90,7 @@ export function Login() {
         <div className={styles["login-form-wrap"]}>
           <span className="demo-tag">
             <span className="status-dot" />
-            Pratinjau antarmuka
+            Akses akun SmartFarm
           </span>
           <h2>Selamat datang kembali</h2>
           <p className={styles["login-intro"]}>
@@ -80,22 +103,22 @@ export function Login() {
                 <input
                   name="email"
                   type="email"
-                  autoComplete="off"
+                  autoComplete="email"
                   placeholder="nama@contoh.com"
                   required
                 />
               </div>
             </Field>
             <Field
-              label="Kata sandi demo"
-              hint="Gunakan isian contoh. Formulir ini belum memverifikasi akun."
+              label="Kata sandi"
+              hint="Gunakan akun yang diberikan administrator."
             >
               <div className={styles["input-with-icon"]}>
                 <Icon name="lock" />
                 <input
                   name="password"
                   type={visible ? "text" : "password"}
-                  autoComplete="off"
+                  autoComplete="current-password"
                   placeholder="Minimal 8 karakter"
                   minLength={8}
                   required
@@ -113,20 +136,11 @@ export function Login() {
                 </button>
               </div>
             </Field>
-            <Field label="Jelajahi sebagai">
-              <select
-                value={role}
-                onChange={(event) => setRole(event.target.value as DemoRole)}
-              >
-                <option>Pemilik lahan</option>
-                <option>Admin</option>
-                <option>Pekerja lapangan</option>
-              </select>
-            </Field>
+            {error && <p role="alert">{error}</p>}
             <div className={styles["login-options"]}>
               <span>
                 <Icon name="shield" size={16} />
-                Data contoh, tanpa akun asli
+                Akun pribadi dan akses sesuai peran
               </span>
               <button
                 className="text-link"
@@ -141,19 +155,10 @@ export function Login() {
               className="button button-primary full-width"
               disabled={loading}
             >
-              {loading ? "Membuka…" : "Masuk ke demo"}
+              {loading ? "Membuka…" : "Masuk"}
               <Icon name="arrow" size={18} />
             </button>
           </form>
-          <div className={styles["login-divider"]}>
-            <span>atau langsung jelajahi</span>
-          </div>
-          <Link
-            className="button button-secondary full-width"
-            href="/dashboard"
-          >
-            Lihat dashboard demo <Icon name="arrow" size={18} />
-          </Link>
           <p className={styles["login-footnote"]}>
             Monitoring tanah, pengelolaan air, dan informasi lahan dalam satu
             tampilan.
@@ -166,13 +171,8 @@ export function Login() {
       {help && (
         <Dialog title="Bantuan masuk" onClose={() => setHelp(false)}>
           <p>
-            Anda sedang menggunakan pratinjau tampilan SmartFarm. Isi email
-            contoh dan kata sandi contoh minimal 8 karakter untuk mencoba alur
-            masuk.
-          </p>
-          <p>
-            Akun, pemulihan kata sandi, dan autentikasi akan tersedia setelah
-            layanan akun dihubungkan.
+            Gunakan email dan kata sandi akun Anda. Hubungi administrator untuk
+            mendapatkan akun atau mengatur ulang kata sandi.
           </p>
           <button
             className="button button-primary full-width"

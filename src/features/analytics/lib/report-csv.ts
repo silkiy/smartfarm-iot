@@ -14,15 +14,15 @@ export function createReportCsv({
 }: {
   farmName?: string;
   zoneName?: string;
-  readings: Reading[];
+  readings: (Reading & { zoneName?: string })[];
 }): string {
   const header =
     "\uFEFFJenis data,Lahan,Zona,Waktu,Kelembapan (%),Ketinggian air (cm)\r\n";
   const rows = readings.map((reading) =>
     [
-      "CONTOH",
+      "TERSIMPAN",
       farmName,
-      zoneName ?? "Semua petak",
+      reading.zoneName ?? zoneName ?? "Semua petak",
       reading.time,
       reading.moisture,
       reading.water,

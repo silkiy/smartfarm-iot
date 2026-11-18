@@ -33,7 +33,7 @@ export function SensorChart({
         <svg
           viewBox="0 0 640 250"
           role="img"
-          aria-label={`Grafik contoh ${metric === "moisture" ? "kelembapan tanah" : "ketinggian air"}. ${readings.map((reading) => `${reading.time}: ${reading[metric]}${unit}`).join(", ")}`}
+          aria-label={`Grafik pembacaan ${metric === "moisture" ? "kelembapan tanah" : "ketinggian air"}. ${readings.map((reading) => `${reading.time}: ${reading[metric]}${unit}`).join(", ")}`}
         >
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -87,7 +87,7 @@ export function SensorChart({
               const index = readings.indexOf(reading);
               return (
                 <text
-                  key={reading.time}
+                  key={index}
                   x={positions[index].x}
                   y="237"
                   textAnchor="middle"

@@ -1,9 +1,9 @@
 "use client";
 import { Icon } from "@/components/ui/icon";
-import { useDemo } from "@/features/demo/demo-provider";
+import { useWorkspace } from "@/features/workspace/workspace-provider";
 
 export function FarmSelect() {
-  const { farms, farmId, setFarmId } = useDemo();
+  const { farms, farmId, setFarmId } = useWorkspace();
   return (
     <label className="farm-select">
       <Icon name="farm" />

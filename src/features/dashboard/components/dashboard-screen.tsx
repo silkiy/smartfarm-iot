@@ -4,7 +4,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { PageHeading } from "@/components/ui/page-heading";
 import styles from "@/features/dashboard/dashboard.module.css";
-import { useDemo } from "@/features/demo/demo-provider";
+import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { FarmSelect } from "@/features/farms/components/farm-select";
 import { cn } from "@/lib/cn";
 import Link from "next/link";
@@ -14,40 +14,43 @@ import { Gauge } from "./moisture-gauge";
 import { ZoneCard } from "./zone-card";
 
 export function Dashboard() {
-  const { farm, farmId, zones, runningZone, notify } = useDemo();
+  const { farm, farmId, zones, user, refresh: reload, notify } = useWorkspace();
   const [refreshing, setRefreshing] = useState(false);
   const currentZones = zones.filter((zone) => zone.farmId === farmId);
   const onlineZones = currentZones.filter((zone) => zone.online);
-  const average = onlineZones.length
+  const readingZones = currentZones.filter((zone) => zone.hasReading);
+  const average = readingZones.length
     ? Math.round(
-        onlineZones.reduce((sum, zone) => sum + zone.moisture, 0) /
-          onlineZones.length,
+        readingZones.reduce((sum, zone) => sum + zone.moisture, 0) /
+          readingZones.length,
       )
     : 0;
-  const water = onlineZones.length
+  const water = readingZones.length
     ? (
-        onlineZones.reduce((sum, zone) => sum + zone.water, 0) /
-        onlineZones.length
+        readingZones.reduce((sum, zone) => sum + zone.water, 0) /
+        readingZones.length
       )
         .toFixed(1)
         .replace(".", ",")
     : "—";
-  const dry = onlineZones.filter((zone) => zone.moisture < 40).length;
-  const farmRunning = currentZones.some((zone) => zone.id === runningZone);
-  function refresh() {
+  const dry = readingZones.filter((zone) => zone.moisture < 40).length;
+  const farmRunning = false;
+  async function refresh() {
     setRefreshing(true);
-    window.setTimeout(() => {
+    try {
+      await reload();
+      notify("Data lahan diperbarui.");
+    } catch {
+      notify("Data gagal diperbarui. Silakan coba lagi.");
+    } finally {
       setRefreshing(false);
-      notify(
-        "Data contoh dimuat ulang. Belum ada pembacaan perangkat langsung.",
-      );
-    }, 600);
+    }
   }
   return (
     <>
       <PageHeading
         title="Dashboard lahan"
-        description="Selamat datang, Pak Supadi. Mari lihat kondisi sawah Anda."
+        description={`Selamat datang, ${user.name}. Mari lihat kondisi lahan Anda.`}
       >
         <button
           className="button button-secondary"
@@ -62,7 +65,7 @@ export function Dashboard() {
         <FarmSelect />
         <span className={cn("muted", styles["timestamp"])}>
           <Icon name="clock" size={15} />
-          Data contoh · 10.45 WIB
+          Data lahan tersimpan
         </span>
       </div>
       {!farm ? (
@@ -88,14 +91,16 @@ export function Dashboard() {
                   <Icon name="leaf" />
                 </span>
               </div>
-              {onlineZones.length ? (
+              {readingZones.length ? (
                 <>
                   <Gauge value={average} />
                   <div className={styles["metric-foot"]}>
                     <Badge tone={average < 40 ? "amber" : "green"}>
                       {average < 40 ? "Perlu perhatian" : "Kondisi terpantau"}
                     </Badge>
-                    <small>Dari {onlineZones.length} sensor aktif</small>
+                    <small>
+                      Dari {readingZones.length} zona dengan pembacaan tersimpan
+                    </small>
                   </div>
                 </>
               ) : (
@@ -124,10 +129,10 @@ export function Dashboard() {
                 </div>
                 <div className={styles["water-reading"]}>
                   <strong>
-                    {water}
+                    {readingZones.length ? water : "—"}
                     <span>cm</span>
                   </strong>
-                  <p>Rata-rata genangan</p>
+                  <p>Rata-rata pembacaan tersimpan</p>
                   <span className="muted">Skala miniatur 0–20 cm</span>
                 </div>
               </div>
@@ -154,16 +159,14 @@ export function Dashboard() {
                 <Icon name="drop" size={32} />
               </div>
               <h3>
-                {farmRunning
-                  ? "Air sedang mengalir"
-                  : "Irigasi sedang berhenti"}
+                {farmRunning ? "Air sedang mengalir" : "Menunggu perangkat"}
               </h3>
               <div className={styles["actuator-row"]}>
                 <span>
-                  Pompa <strong>{farmRunning ? "Menyala" : "Mati"}</strong>
+                  Pompa <strong>Belum diketahui</strong>
                 </span>
                 <span>
-                  Katup <strong>{farmRunning ? "Terbuka" : "Tertutup"}</strong>
+                  Katup <strong>Belum diketahui</strong>
                 </span>
               </div>
               <Link
@@ -181,12 +184,12 @@ export function Dashboard() {
                 <strong>
                   {dry > 0
                     ? `${dry} petak memerlukan perhatian`
-                    : "Ada perangkat yang terputus"}
+                    : "Perangkat belum terhubung"}
                 </strong>
                 <p>
                   {dry > 0
-                    ? "Kelembapan di bawah ambang contoh 40%. Periksa sensor sebelum mengairi."
-                    : "Sebagian pembacaan sudah lama. Periksa koneksi perangkat."}
+                    ? "Kelembapan di bawah ambang 40%. Periksa sensor sebelum mengairi."
+                    : "Pembacaan sensor tersedia setelah perangkat dipasang dan dikalibrasi."}
                 </p>
               </div>
               <Link href="/notifikasi" className="text-link">
