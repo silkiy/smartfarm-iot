@@ -19,6 +19,8 @@ npm run dev
 
 CLI meminta email, nama, dan kata sandi admin; kata sandi tidak ditampilkan. Buka [localhost:3000](http://localhost:3000), lalu masuk. Admin membuat akun pemilik/pekerja melalui profil → **Pengguna & penugasan**. Tidak ada akun/password bawaan atau pendaftaran publik.
 
+Untuk pengembangan, tersedia seeder opsional berisi 10 data pada setiap kategori aplikasi. Akun yang sudah disiapkan pada database pengembangan: `silki@dummy.com`. Lihat [data dummy dan cara menjalankan seeder](DUMMY_DATA.md).
+
 ## Halaman
 
 | Route         | Fungsi                                                             |
@@ -45,6 +47,7 @@ Test browser memerlukan MongoDB pengujian khusus dengan nama `smartfarm_test_*` 
 ## Panduan
 
 - [Backend, konfigurasi akun, API, cuaca, WhatsApp dan pengujian](BACKEND.md)
+- [Dataset dummy, akun dan penanda simulasi](DUMMY_DATA.md)
 - [Arsitektur dan lokasi kode](ARCHITECTURE.md)
 - [Maintenance dan perintah rutin](CONTRIBUTING.md)
 

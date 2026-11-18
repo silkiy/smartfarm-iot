@@ -66,6 +66,7 @@ export async function GET(request: Request) {
         time: r.measuredAt.toISOString(),
         moisture: r.soilMoisture,
         water: r.waterLevelCm,
+        isDemo: r.isDemo === true,
         zoneName:
           selected.find((z) => z._id.toHexString() === r.zoneId)?.name ?? "",
       })),
@@ -74,6 +75,7 @@ export async function GET(request: Request) {
         time: e.startedAt.toISOString(),
         result: e.result,
         trigger: e.trigger,
+        isDemo: e.isDemo === true,
       })),
     });
   });

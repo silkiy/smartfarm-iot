@@ -23,6 +23,13 @@ export type ReportData = {
     moisture: number;
     water: number;
     zoneName: string;
+    isDemo?: boolean;
   }[];
-  events: { id: string; time: string; result: string; trigger: string }[];
+  events: {
+    id: string;
+    time: string;
+    result: string;
+    trigger: string;
+    isDemo?: boolean;
+  }[];
 };

@@ -62,6 +62,7 @@ export async function workspaceSnapshot(
     },
     farms: farms.map((f) => ({
       id: f._id.toHexString(),
+      isDemo: f.isDemo === true,
       name: f.name,
       location: f.location ?? "",
       area: (f.areaM2 ?? 0).toLocaleString("id-ID"),

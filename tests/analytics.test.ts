@@ -30,6 +30,14 @@ describe("report date filters", () => {
 });
 
 describe("stored report CSV", () => {
+  it("marks simulated records explicitly instead of claiming measured data", () => {
+    const csv = createReportCsv({
+      farmName: "Dummy farm",
+      readings: [{ time: "08.00", moisture: 60, water: 5, isDemo: true }],
+    });
+    assert.ok(csv.includes('"DUMMY"'));
+    assert.ok(!csv.includes('"TERSIMPAN"'));
+  });
   const readings = [{ time: "08.00", moisture: 66, water: 6.5 }];
   it("labels exported data and includes exactly the selected readings", () => {
     const csv = createReportCsv({ farmName: "Blok A", readings });

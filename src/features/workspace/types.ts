@@ -1,6 +1,7 @@
 import type { UserRole } from "@/domain/models";
 export type WorkspaceRole = "Pemilik lahan" | "Admin" | "Pekerja lapangan";
 export type Farm = {
+  isDemo?: boolean;
   id: string;
   name: string;
   location: string;

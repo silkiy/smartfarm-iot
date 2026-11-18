@@ -27,6 +27,9 @@ export interface BaseDocument {
   _id?: ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  isDemo?: boolean;
+  seedBatch?: string;
+  seedKey?: string;
 }
 
 export interface ProfileDocument extends BaseDocument {

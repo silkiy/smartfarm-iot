@@ -30,6 +30,7 @@ export async function GET(
     const recent = await db.collection("weather_records").findOne(
       {
         farmId: farm._id,
+        isDemo: { $ne: true },
         latitude: farm.latitude,
         longitude: farm.longitude,
         fetchedAt: { $gte: new Date(Date.now() - 10 * 60_000) },

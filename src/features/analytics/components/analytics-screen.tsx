@@ -85,7 +85,11 @@ export function Analytics() {
     <>
       <PageHeading
         title="Grafik & laporan"
-        description="Pembacaan sensor dan kejadian irigasi yang tersimpan di database."
+        description={
+          farm?.isDemo
+            ? "Data DUMMY untuk latihan, bukan hasil pengukuran atau aktivitas perangkat fisik."
+            : "Pembacaan sensor dan kejadian irigasi yang tersimpan di database."
+        }
       >
         <button
           className="button button-secondary"
@@ -196,7 +200,8 @@ export function Analytics() {
               {new Date(e.time).toLocaleString("id-ID", {
                 timeZone: "Asia/Jakarta",
               })}{" "}
-              · {e.trigger} · {e.result}
+              · {e.isDemo ? "DUMMY · " : ""}
+              {e.trigger} · {e.result}
             </p>
           ))
         ) : (

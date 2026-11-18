@@ -1,12 +1,12 @@
 # Backend tanpa hardware
 
-Aplikasi memakai Next.js Route Handlers, Auth.js Credentials/JWT dan MongoDB. Halaman aplikasi memerlukan login; data awal kosong sampai admin/pemilik membuat lahan. Data demo dan pilihan mengganti peran sendiri sudah dihapus.
+Aplikasi memakai Next.js Route Handlers, Auth.js Credentials/JWT dan MongoDB. Halaman aplikasi memerlukan login; database baru kosong sampai admin/pemilik membuat lahan atau seeder pengembangan dijalankan. Data contoh hanya dimasukkan secara eksplisit lewat [seeder dummy](DUMMY_DATA.md), tersimpan di database dan ditandai DUMMY. Peran akun ditentukan profil database.
 
 ## Menjalankan
 
 1. Isi `MONGODB_URI` dalam `.env.local` atau `.env`, dengan nama database pada URI. Atlas harus aktif dan Network Access mengizinkan IP pengembang. Jangan mematikan verifikasi TLS untuk melewati masalah koneksi.
 2. Isi `AUTH_SECRET` dengan nilai acak yang kuat. Konfigurasi lokal saat implementasi sudah dibuat di `.env.local` yang diabaikan Git. Untuk lingkungan baru, jalankan `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"` lalu simpan hasilnya ke environment server.
-3. Jalankan `npm run bootstrap:admin`. Masukkan email, nama, dan kata sandi minimal 12 karakter. Isian kata sandi tidak ditampilkan. CLI juga menerima `ADMIN_BOOTSTRAP_*` jika diperlukan. Akun yang sudah ada tidak ditimpa, dan ID akun tidak diubah. Hapus variabel kata sandi bootstrap sesudah digunakan.
+3. Jalankan `npm run bootstrap:admin`. Masukkan email, nama, dan kata sandi minimal 9 karakter. Isian kata sandi tidak ditampilkan. CLI juga menerima `ADMIN_BOOTSTRAP_*` jika diperlukan. Akun yang sudah ada tidak ditimpa, dan ID akun tidak diubah. Hapus variabel kata sandi bootstrap sesudah digunakan.
 4. Jalankan `npm run dev`, buka `/login`, lalu masuk menggunakan akun tersebut.
 5. Buka profil → **Pengguna & penugasan** untuk membuat pemilik/pekerja, mengatur kepemilikan lahan dan penugasan zona. Admin membuat akun; registrasi publik tidak tersedia.
 

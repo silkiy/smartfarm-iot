@@ -2,6 +2,10 @@
 
 Audit 19 November 2026 terhadap implementasi tanpa hardware pada branch `codex/non-iot-backend`, dibandingkan PRD, kontrak API, dan panduan setup. Hasil ini mencakup fitur yang sudah diimplementasikan; penerimaan penuh PRD tetap memerlukan perangkat fisik dan pengujian WhatsApp resmi.
 
+Pembaruan setelah audit: minimum kata sandi menjadi 9 karakter. Dataset pengembangan telah dimasukkan ke Atlas: 12 kategori × 10 dokumen, termasuk admin `silki@dummy.com`, lima pemilik dan empat pekerja. Login ketiga peran diverifikasi melalui browser tanpa error. Data hardware/pengiriman tetap nonaktif dan berlabel DUMMY. Rincian serta cara menjalankan ulang tersedia di [DUMMY_DATA.md](DUMMY_DATA.md); hasil `profiles = 0` di bawah adalah keadaan saat audit awal, sebelum permintaan pengisian dataset.
+
+Verifikasi pembaruan: format, lint, TypeScript, build produksi, 32 unit test dan 63 tes browser lulus. Pembuatan/reset akun menolak 8 karakter dan menerima 9; sesi lama tetap dicabut setelah reset. Seeder lokal dijalankan dua kali dengan jumlah tetap 10 per kategori, identitas/hash/versi sesi admin tetap, dan data lain dipertahankan. Dataset dummy diverifikasi pada tampilan ponsel dan CSV; tidak ada perintah menunggu eksekusi atau pesan terkirim pada dataset tersebut.
+
 ## Temuan yang diperbaiki
 
 | Temuan                                                      | Dampak sebelumnya                                                      | Perbaikan dan bukti                                                                                                                                                                                                                        |

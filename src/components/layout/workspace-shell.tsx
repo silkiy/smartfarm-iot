@@ -25,7 +25,7 @@ const navigation: {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [profileOpen, setProfileOpen] = useState(false);
-  const { role, notices, user } = useWorkspace();
+  const { role, notices, user, farm } = useWorkspace();
   const initials = user.name
     .split(" ")
     .map((part) => part[0])
@@ -127,8 +127,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className={styles["demo-strip"]}>
             <Icon name="info" size={16} />
             <span>
-              Pengelolaan lahan sudah tersedia. Pembacaan sensor dan kendali
-              irigasi menunggu perangkat.
+              {farm?.isDemo
+                ? "Data DUMMY untuk mencoba aplikasi, bukan pembacaan atau aktivitas perangkat fisik."
+                : "Pengelolaan lahan sudah tersedia. Pembacaan sensor dan kendali irigasi menunggu perangkat."}
             </span>
           </div>
           {children}
