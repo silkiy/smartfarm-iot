@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { assertZoneAccess, AuthorizationError } from "../src/lib/authz/policy";
+import {
+  assertZoneAccess,
+  AuthorizationError,
+} from "../src/server/auth/policy";
 
 const farm = { ownerUserId: "owner-1" };
 const zone = {
@@ -14,13 +17,23 @@ describe("authorization policy", () => {
       assertZoneAccess({ id: "admin", role: "ADMIN" }, farm, zone, "READ"),
     );
     assert.doesNotThrow(() =>
-      assertZoneAccess({ id: "owner-1", role: "LANDOWNER" }, farm, zone, "READ"),
+      assertZoneAccess(
+        { id: "owner-1", role: "LANDOWNER" },
+        farm,
+        zone,
+        "READ",
+      ),
     );
   });
 
   it("allows assigned workers to read but not control by default", () => {
     assert.doesNotThrow(() =>
-      assertZoneAccess({ id: "worker-1", role: "FIELD_WORKER" }, farm, zone, "READ"),
+      assertZoneAccess(
+        { id: "worker-1", role: "FIELD_WORKER" },
+        farm,
+        zone,
+        "READ",
+      ),
     );
     assert.throws(
       () =>

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { getMongoDatabase } from "../src/lib/mongodb";
 import { collectionNames, type ProfileDocument } from "../src/domain/models";
-import { hashPassword } from "../src/services/passwords";
+import { hashPassword } from "../src/server/auth/passwords";
+import { getMongoDatabase } from "../src/server/db/mongodb";
 
 const email = process.env.ADMIN_BOOTSTRAP_EMAIL?.trim().toLowerCase();
 const password = process.env.ADMIN_BOOTSTRAP_PASSWORD;
@@ -26,10 +26,8 @@ const profile: ProfileDocument = {
   updatedAt: now,
 };
 
-await database.collection<ProfileDocument>(collectionNames.profiles).updateOne(
-  { email },
-  { $set: profile },
-  { upsert: true },
-);
+await database
+  .collection<ProfileDocument>(collectionNames.profiles)
+  .updateOne({ email }, { $set: profile }, { upsert: true });
 
 console.log(`Admin profile bootstrapped for ${email}`);

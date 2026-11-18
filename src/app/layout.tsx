@@ -1,25 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const jakarta = localFont({
+  src: "../assets/fonts/plus-jakarta-sans.ttf",
+  variable: "--font-jakarta",
+  display: "swap",
+  weight: "400 800",
 });
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   title: "SmartFarm IoT",
   description: "Monitoring dan otomatisasi irigasi sawah",
 };
-
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="id" data-scroll-behavior="smooth" className={jakarta.variable}>
       <body>{children}</body>
     </html>
   );
