@@ -37,7 +37,15 @@ export async function GET(
       { sort: { fetchedAt: -1 }, projection: { _id: 0 } },
     );
     if (recent) return json(recent);
-    const weather = await fetchWeather(farm.latitude, farm.longitude);
+    const weather = await fetchWeather(farm.latitude, farm.longitude).catch(
+      () => {
+        throw new ApiError(
+          502,
+          "WEATHER_PROVIDER_UNAVAILABLE",
+          "Layanan cuaca belum tersedia. Coba lagi beberapa saat.",
+        );
+      },
+    );
     await db.collection("weather_records").insertOne({
       ...weather,
       farmId: farm._id,

@@ -1,13 +1,11 @@
 import { farmInputSchema } from "@/domain/workspace";
+import { parsePage } from "@/domain/pagination";
 import { AuthorizationError } from "@/server/auth/policy";
 import { api, input, json } from "@/server/http/api";
 import { visibleResources } from "@/server/workspace/access";
 export async function GET(request: Request) {
   return api(request, async (user, db) => {
-    const page = Math.max(
-      1,
-      Number(new URL(request.url).searchParams.get("page")) || 1,
-    );
+    const page = parsePage(new URL(request.url).searchParams);
     const { farms } = await visibleResources(db, user);
     return json({
       items: farms

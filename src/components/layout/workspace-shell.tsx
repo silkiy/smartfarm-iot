@@ -73,7 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={() => signOut({ redirectTo: "/login" })}
             className={styles["nav-link"]}
           >
             <Icon name="logout" />
@@ -174,7 +174,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           )}
           <button
             className="button button-primary full-width"
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={() => signOut({ redirectTo: "/login" })}
           >
             Keluar dari akun
           </button>

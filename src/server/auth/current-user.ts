@@ -11,7 +11,8 @@ export async function currentUser() {
     userId: session.user.id,
     isActive: true,
   });
-  if (!profile) return null;
+  if (!profile || (profile.sessionVersion ?? 0) !== session.user.sessionVersion)
+    return null;
   return {
     id: profile.userId,
     role: profile.role,

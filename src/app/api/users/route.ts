@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { userInputSchema } from "@/domain/workspace";
+import { parsePage } from "@/domain/pagination";
 import { AuthorizationError } from "@/server/auth/policy";
 import { hashPassword } from "@/server/auth/passwords";
 import { api, input, json } from "@/server/http/api";
@@ -7,7 +8,7 @@ export async function GET(request: Request) {
   return api(request, async (user, db) => {
     if (user.role === "FIELD_WORKER") throw new AuthorizationError();
     const params = new URL(request.url).searchParams;
-    const page = Math.max(1, Math.floor(Number(params.get("page")) || 1));
+    const page = parsePage(params);
     const query =
       user.role === "ADMIN" ? {} : { role: "FIELD_WORKER", isActive: true };
     const collection = db.collection("profiles");

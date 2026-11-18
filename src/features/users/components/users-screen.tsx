@@ -51,13 +51,19 @@ export function UsersScreen() {
     setError("");
     try {
       await requestJson(path, method, data);
-      await refresh();
-      const next = await requestJson<{ items: Person[]; total: number }>(
-        `/api/users?page=${page}`,
-      );
-      setPeople(next.items);
-      setTotal(next.total);
-      notify("Perubahan berhasil disimpan.");
+      try {
+        await refresh();
+        const next = await requestJson<{ items: Person[]; total: number }>(
+          `/api/users?page=${page}`,
+        );
+        setPeople(next.items);
+        setTotal(next.total);
+        notify("Perubahan berhasil disimpan.");
+      } catch {
+        setError(
+          "Perubahan tersimpan, tetapi daftar belum dapat diperbarui. Muat ulang halaman.",
+        );
+      }
       return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Penyimpanan gagal.");

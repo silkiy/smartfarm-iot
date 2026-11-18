@@ -319,9 +319,245 @@ test.describe("authenticated application", () => {
         ).status(),
       ).toBe(200);
       expect((await ctx.get("/api/workspace")).status()).toBe(401);
+      expect(
+        (
+          await request.patch(`/api/users/${id}`, {
+            headers: { Origin: base },
+            data: { isActive: true },
+          })
+        ).status(),
+      ).toBe(200);
+      expect((await ctx.get("/api/workspace")).status()).toBe(401);
     } finally {
       await ctx.dispose();
     }
+  });
+  test("password reset revokes an existing session and new credentials can sign in", async ({
+    request,
+    playwright,
+  }) => {
+    const email = `${randomUUID()}@example.invalid`,
+      password = randomUUID() + "Aa!";
+    const response = await request.post("/api/users", {
+      headers: { Origin: base },
+      data: {
+        email,
+        password,
+        displayName: "Reset audit",
+        role: "FIELD_WORKER",
+      },
+    });
+    expect(response.status()).toBe(201);
+    const id = (await response.json()).data.id;
+    const accounts = await readAccounts();
+    accounts.push({ userId: id, email, password, role: "FIELD_WORKER" });
+    await writeFile("test-results/accounts.json", JSON.stringify(accounts));
+    const ctx = await playwright.request.newContext({
+      baseURL: base,
+      extraHTTPHeaders: { Origin: base },
+    });
+    const fresh = await playwright.request.newContext({
+      baseURL: base,
+      extraHTTPHeaders: { Origin: base },
+    });
+    try {
+      await login(ctx, accounts.length - 1);
+      const nextPassword = randomUUID() + "Aa!";
+      expect(
+        (
+          await request.patch(`/api/users/${id}`, {
+            headers: { Origin: base },
+            data: { password: nextPassword },
+          })
+        ).status(),
+      ).toBe(200);
+      expect((await ctx.get("/api/workspace")).status()).toBe(401);
+      accounts[accounts.length - 1].password = nextPassword;
+      await writeFile("test-results/accounts.json", JSON.stringify(accounts));
+      await login(fresh, accounts.length - 1);
+      expect((await fresh.get("/api/workspace")).status()).toBe(200);
+    } finally {
+      await ctx.dispose();
+      await fresh.dispose();
+    }
+  });
+  test("list endpoints reject invalid page numbers", async ({ request }) => {
+    for (const path of ["/api/users", "/api/farms"]) {
+      for (const page of ["Infinity", "1.5", "-1", "abc", "100001"]) {
+        expect((await request.get(`${path}?page=${page}`)).status()).toBe(422);
+      }
+    }
+  });
+  test("farm edits, ownership transfer and assignment removal enforce current access", async ({
+    request,
+    playwright,
+  }) => {
+    const accounts = await readAccounts();
+    const contexts: APIRequestContext[] = [];
+    try {
+      for (const index of [1, 2, 3]) {
+        const ctx = await playwright.request.newContext({
+          baseURL: base,
+          extraHTTPHeaders: { Origin: base },
+        });
+        await login(ctx, index);
+        contexts.push(ctx);
+      }
+      const [owner, other, worker] = contexts;
+      const fields = {
+        name: "Transfer audit",
+        location: "Lamongan",
+        areaM2: 1200,
+        phase: "Vegetatif",
+      };
+      const created = await owner.post("/api/farms", { data: fields });
+      expect(created.status()).toBe(201);
+      const farmId = (await created.json()).data.id;
+      const createdZone = await owner.post(`/api/farms/${farmId}/zones`, {
+        data: { name: "Zona audit" },
+      });
+      expect(createdZone.status()).toBe(201);
+      const zoneId = (await createdZone.json()).data.id;
+      expect(
+        (
+          await owner.patch(`/api/farms/${farmId}`, {
+            data: { ...fields, areaM2: 2400, phase: "Generatif" },
+          })
+        ).status(),
+      ).toBe(200);
+      expect(
+        (
+          await owner.patch(`/api/zones/${zoneId}`, {
+            data: { name: "Zona diperbarui" },
+          })
+        ).status(),
+      ).toBe(200);
+      const state = (await (await owner.get("/api/workspace")).json()).data;
+      expect(
+        state.farms.find((f: { id: string }) => f.id === farmId).phase,
+      ).toBe("Generatif");
+      expect(
+        state.zones.find((z: { id: string }) => z.id === zoneId).name,
+      ).toBe("Zona diperbarui");
+      expect(
+        (
+          await owner.put(`/api/zones/${zoneId}/assignments`, {
+            data: { assignedUserIds: [], controlUserIds: [accounts[3].userId] },
+          })
+        ).status(),
+      ).toBe(422);
+      expect(
+        (
+          await owner.put(`/api/zones/${zoneId}/assignments`, {
+            data: { assignedUserIds: [accounts[3].userId], controlUserIds: [] },
+          })
+        ).status(),
+      ).toBe(200);
+      expect(
+        (await (await worker.get("/api/workspace")).json()).data.zones.map(
+          (z: { id: string }) => z.id,
+        ),
+      ).toContain(zoneId);
+      expect(
+        (
+          await request.put(`/api/farms/${farmId}/owner`, {
+            headers: { Origin: base },
+            data: { ownerUserId: accounts[2].userId },
+          })
+        ).status(),
+      ).toBe(200);
+      expect(
+        (await owner.patch(`/api/farms/${farmId}`, { data: fields })).status(),
+      ).toBe(403);
+      expect(
+        (await other.patch(`/api/farms/${farmId}`, { data: fields })).status(),
+      ).toBe(200);
+      expect(
+        (
+          await other.put(`/api/zones/${zoneId}/assignments`, {
+            data: { assignedUserIds: [], controlUserIds: [] },
+          })
+        ).status(),
+      ).toBe(200);
+      expect(
+        (await (await worker.get("/api/workspace")).json()).data.zones.map(
+          (z: { id: string }) => z.id,
+        ),
+      ).not.toContain(zoneId);
+      expect((await other.delete(`/api/zones/${zoneId}`)).status()).toBe(200);
+      expect(
+        (
+          await other.patch(`/api/zones/${zoneId}`, {
+            data: { name: "Revive" },
+          })
+        ).status(),
+      ).toBe(404);
+      expect((await other.delete(`/api/farms/${farmId}`)).status()).toBe(200);
+      expect(
+        (
+          await other.post(`/api/farms/${farmId}/zones`, {
+            data: { name: "Revive" },
+          })
+        ).status(),
+      ).toBe(404);
+    } finally {
+      await Promise.all(contexts.map((ctx) => ctx.dispose()));
+    }
+  });
+  test("API rejects malformed requests and provider tests remain disabled", async ({
+    request,
+  }) => {
+    expect(
+      (
+        await request.post("/api/farms", {
+          headers: { Origin: base, "Content-Type": "application/json" },
+          data: Buffer.from("{"),
+        })
+      ).status(),
+    ).toBe(400);
+    expect(
+      (
+        await request.post("/api/farms", {
+          headers: { Origin: base, "Content-Type": "text/plain" },
+          data: "{}",
+        })
+      ).status(),
+    ).toBe(415);
+    expect(
+      (
+        await request.post("/api/farms", {
+          headers: { Origin: base, "Content-Type": "application/json" },
+          data: JSON.stringify({ name: "a".repeat(17000) }),
+        })
+      ).status(),
+    ).toBe(413);
+    expect(
+      (
+        await request.delete("/api/farms/not-an-id", {
+          headers: { Origin: base },
+        })
+      ).status(),
+    ).toBe(400);
+    const readiness = (await (await request.get("/api/integrations")).json())
+      .data;
+    expect(readiness.whatsappReady).toBe(false);
+    expect(
+      (
+        await request.post("/api/integrations/whatsapp/test", {
+          headers: { Origin: base },
+          data: { requestId: randomUUID() },
+        })
+      ).status(),
+    ).toBe(503);
+    const { farmId } = await resources();
+    expect((await request.get(`/api/farms/${farmId}/weather`)).status()).toBe(
+      503,
+    );
+    const cookie = (await request.storageState()).cookies.find((c) =>
+      c.name.includes("session-token"),
+    );
+    expect(cookie?.httpOnly).toBe(true);
+    expect(cookie?.sameSite).toBe("Lax");
   });
   test("reports and dashboard use existing database measurements without device execution", async ({
     request,
@@ -385,6 +621,48 @@ test.describe("authenticated application", () => {
     } finally {
       await client.close();
     }
+  });
+  test("successful user creation is not reported as failed when list refresh fails", async ({
+    page,
+  }) => {
+    await page.goto("/pengguna");
+    await expect(
+      page.getByRole("heading", { name: "Daftar pengguna", exact: true }),
+    ).toBeVisible();
+    const email = `${randomUUID()}@example.invalid`,
+      password = randomUUID() + "Aa!";
+    await page
+      .getByLabel("Nama pengguna", { exact: true })
+      .fill("Refresh audit");
+    await page.getByLabel("Email pengguna", { exact: true }).fill(email);
+    await page.getByLabel(/^Kata sandi awal/).fill(password);
+    await page.route("**/api/users?*", (route) =>
+      route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ error: { message: "Daftar gagal dimuat" } }),
+      }),
+    );
+    const responsePromise = page.waitForResponse(
+      (r) =>
+        new URL(r.url()).pathname === "/api/users" &&
+        r.request().method() === "POST",
+    );
+    await page
+      .getByRole("button", { name: "Simpan akun", exact: true })
+      .click();
+    const response = await responsePromise;
+    expect(response.status()).toBe(201);
+    const id = (await response.json()).data.id;
+    const accounts = await readAccounts();
+    accounts.push({ userId: id, email, password, role: "LANDOWNER" });
+    await writeFile("test-results/accounts.json", JSON.stringify(accounts));
+    await expect(
+      page.getByLabel("Email pengguna", { exact: true }),
+    ).toHaveValue("");
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(
+      "tersimpan",
+    );
   });
   test("logout revokes browser session", async ({ page }) => {
     await page.goto("/dashboard");

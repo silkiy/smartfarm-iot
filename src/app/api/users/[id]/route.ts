@@ -38,7 +38,15 @@ export async function PATCH(
     if (fields.isActive !== undefined) patch.isActive = fields.isActive;
     if (fields.password)
       patch.passwordHash = await hashPassword(fields.password);
-    await db.collection("profiles").updateOne({ userId: id }, { $set: patch });
+    await db.collection("profiles").updateOne(
+      { userId: id },
+      {
+        $set: patch,
+        ...(fields.password || fields.isActive === false
+          ? { $inc: { sessionVersion: 1 } }
+          : {}),
+      },
+    );
     return json({ id });
   });
 }

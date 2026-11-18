@@ -1,4 +1,10 @@
 import { z } from "zod";
+export class WeatherProviderError extends Error {
+  constructor() {
+    super("WEATHER_PROVIDER_UNAVAILABLE");
+    this.name = "WeatherProviderError";
+  }
+}
 export const weatherResponseSchema = z.object({
   current: z.object({
     time: z.number().int(),
@@ -17,20 +23,24 @@ export async function fetchWeather(latitude: number, longitude: number) {
     timeformat: "unixtime",
     timezone: "Asia/Jakarta",
   }).toString();
-  const response = await fetch(url, {
-    redirect: "error",
-    signal: AbortSignal.timeout(10_000),
-    cache: "no-store",
-  });
-  if (!response.ok) throw new Error("WEATHER_PROVIDER_UNAVAILABLE");
-  const { current } = weatherResponseSchema.parse(await response.json());
-  return {
-    temperatureC: current.temperature_2m,
-    humidityPercent: current.relative_humidity_2m,
-    windSpeedKmh: current.wind_speed_10m,
-    weatherCode: current.weather_code,
-    observedAt: new Date(current.time * 1000),
-    fetchedAt: new Date(),
-    provider: "Open-Meteo",
-  };
+  try {
+    const response = await fetch(url, {
+      redirect: "error",
+      signal: AbortSignal.timeout(10_000),
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("WEATHER_PROVIDER_UNAVAILABLE");
+    const { current } = weatherResponseSchema.parse(await response.json());
+    return {
+      temperatureC: current.temperature_2m,
+      humidityPercent: current.relative_humidity_2m,
+      windSpeedKmh: current.wind_speed_10m,
+      weatherCode: current.weather_code,
+      observedAt: new Date(current.time * 1000),
+      fetchedAt: new Date(),
+      provider: "Open-Meteo",
+    };
+  } catch {
+    throw new WeatherProviderError();
+  }
 }

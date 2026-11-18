@@ -41,5 +41,6 @@ export async function authenticateCredentials(raw: unknown) {
     email: profile.email,
     name: profile.displayName,
     role: profile.role,
+    sessionVersion: profile.sessionVersion ?? 0,
   };
 }

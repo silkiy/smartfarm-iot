@@ -36,6 +36,7 @@ export interface ProfileDocument extends BaseDocument {
   role: UserRole;
   isActive: boolean;
   passwordHash: string;
+  sessionVersion?: number;
   preferences?: { web: boolean; whatsapp: boolean };
 }
 
