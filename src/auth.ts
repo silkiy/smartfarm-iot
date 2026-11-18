@@ -1,8 +1,9 @@
+import "server-only";
+import { credentialsSchema } from "@/domain/users";
+import { verifyPassword } from "@/server/auth/passwords";
+import { findProfileByEmail } from "@/server/auth/users";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { credentialsSchema } from "@/domain/users";
-import { findProfileByEmail } from "@/server/auth/users";
-import { verifyPassword } from "@/server/auth/passwords";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: "jwt" },

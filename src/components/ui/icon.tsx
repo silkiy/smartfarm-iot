@@ -40,9 +40,7 @@ const paths = {
   calendar: "M3 5h18v16H3zM7 2v6m10-6v6M3 10h18M7 14h3m4 0h3M7 17h3",
   print: "M6 9V3h12v6M6 17H3V9h18v8h-3M6 14h12v7H6z",
 } as const;
-
 export type IconName = keyof typeof paths;
-
 export function Icon({
   name,
   size = 20,

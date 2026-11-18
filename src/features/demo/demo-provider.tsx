@@ -1,26 +1,27 @@
 "use client";
-
+import styles from "@/features/demo/demo.module.css";
+import {
+  initialFarms,
+  initialNotices,
+  initialZones,
+} from "@/features/demo/fixtures";
+import type {
+  DemoRole,
+  Farm,
+  IrrigationRule,
+  Notice,
+  Zone,
+} from "@/features/demo/types";
+import { cn } from "@/lib/cn";
 import {
   createContext,
   useContext,
   useEffect,
   useState,
-  type ReactNode,
   type Dispatch,
+  type ReactNode,
   type SetStateAction,
 } from "react";
-import type {
-  DemoRole,
-  Farm,
-  Zone,
-  Notice,
-  IrrigationRule,
-} from "@/features/demo/types";
-import {
-  initialFarms,
-  initialZones,
-  initialNotices,
-} from "@/features/demo/fixtures";
 
 type DemoContextValue = {
   farms: Farm[];
@@ -36,8 +37,16 @@ type DemoContextValue = {
   setSelectedZoneId: (id: string) => void;
   rules: Record<string, IrrigationRule>;
   setRules: Dispatch<SetStateAction<Record<string, IrrigationRule>>>;
-  preferences: { web: boolean; whatsapp: boolean };
-  setPreferences: Dispatch<SetStateAction<{ web: boolean; whatsapp: boolean }>>;
+  preferences: {
+    web: boolean;
+    whatsapp: boolean;
+  };
+  setPreferences: Dispatch<
+    SetStateAction<{
+      web: boolean;
+      whatsapp: boolean;
+    }>
+  >;
   notices: Notice[];
   setNotices: Dispatch<SetStateAction<Notice[]>>;
   runningZone: string | null;
@@ -47,7 +56,6 @@ type DemoContextValue = {
   notify: (text: string) => void;
 };
 const DemoContext = createContext<DemoContextValue | null>(null);
-
 export function DemoProvider({ children }: { children: ReactNode }) {
   const [farms, setFarms] = useState(initialFarms);
   const [zones, setZones] = useState(initialZones);
@@ -63,7 +71,6 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const [runningZone, setRunningZone] = useState<string | null>(null);
   const [remaining, setRemaining] = useState(0);
   const [toast, setToast] = useState("");
-
   useEffect(() => {
     if (!runningZone || remaining <= 0) return;
     const timer = window.setTimeout(
@@ -72,13 +79,11 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     );
     return () => window.clearTimeout(timer);
   }, [runningZone, remaining]);
-
   useEffect(() => {
     if (!toast) return;
     const timer = window.setTimeout(() => setToast(""), 4500);
     return () => window.clearTimeout(timer);
   }, [toast]);
-
   const activeZone = remaining > 0 ? runningZone : null;
   function startIrrigation(zoneId: string, seconds: number) {
     setRunningZone(zoneId);
@@ -90,7 +95,6 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     setRemaining(0);
     setToast("Simulasi dihentikan. Pompa mati dan katup tertutup.");
   }
-
   return (
     <DemoContext.Provider
       value={{
@@ -120,7 +124,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     >
       {children}
       <div
-        className={`toast${toast ? " toast-visible" : ""}`}
+        className={cn(styles["toast"], toast ? styles["toast-visible"] : "")}
         role="status"
         aria-live="polite"
       >
@@ -129,7 +133,6 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     </DemoContext.Provider>
   );
 }
-
 export function useDemo() {
   const value = useContext(DemoContext);
   if (!value) throw new Error("useDemo requires DemoProvider");

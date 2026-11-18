@@ -1,15 +1,15 @@
 "use client";
-
+import { Brand } from "@/components/layout/brand";
+import { Dialog } from "@/components/ui/dialog";
+import { Field } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
+import styles from "@/features/auth/auth.module.css";
+import { useDemo } from "@/features/demo/demo-provider";
+import type { DemoRole } from "@/features/demo/types";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Brand } from "@/components/layout/brand";
-import { Icon } from "@/components/ui/icon";
-import { Dialog } from "@/components/ui/dialog";
-import { Field } from "@/components/ui/field";
-import { useDemo } from "@/features/demo/demo-provider";
-import type { DemoRole } from "@/features/demo/types";
 
 export function Login() {
   const [visible, setVisible] = useState(false);
@@ -24,20 +24,20 @@ export function Login() {
     router.push("/dashboard");
   }
   return (
-    <main className="login-page">
-      <section className="login-story">
+    <main className={styles["login-page"]}>
+      <section className={styles["login-story"]}>
         <Image
           src="/images/rice-fields.jpg"
           alt="Sawah berundak yang hijau di bawah cahaya pagi"
           fill
           sizes="(min-width: 900px) 50vw, 100vw"
-          priority
+          loading="eager"
         />
-        <div className="login-story-shade" />
-        <Link href="/dashboard" className="login-brand">
+        <div className={styles["login-story-shade"]} />
+        <Link href="/dashboard" className={styles["login-brand"]}>
           <Brand />
         </Link>
-        <div className="login-story-copy">
+        <div className={styles["login-story-copy"]}>
           <span className="photo-label">
             <Icon name="leaf" size={16} />
             Lebih dekat dengan lahan Anda
@@ -51,31 +51,31 @@ export function Login() {
             Pantau kondisi tanah dan air, lalu atur irigasi dari satu tempat
             yang sederhana.
           </p>
-          <div className="login-story-location">
+          <div className={styles["login-story-location"]}>
             <Icon name="pin" size={18} />
             <span>Terinspirasi dari sawah Tikung, Lamongan</span>
           </div>
         </div>
-        <span className="login-photo-credit">
+        <span className={styles["login-photo-credit"]}>
           SmartFarm IoT · Pertanian yang lebih terarah
         </span>
       </section>
-      <section className="login-form-side">
-        <div className="login-mobile-brand">
+      <section className={styles["login-form-side"]}>
+        <div className={styles["login-mobile-brand"]}>
           <Brand />
         </div>
-        <div className="login-form-wrap">
+        <div className={styles["login-form-wrap"]}>
           <span className="demo-tag">
             <span className="status-dot" />
             Pratinjau antarmuka
           </span>
           <h2>Selamat datang kembali</h2>
-          <p className="login-intro">
+          <p className={styles["login-intro"]}>
             Satu tempat untuk mengenali dan merawat sawah Anda.
           </p>
-          <form onSubmit={submit} className="login-form">
+          <form onSubmit={submit} className={styles["login-form"]}>
             <Field label="Alamat email">
-              <div className="input-with-icon">
+              <div className={styles["input-with-icon"]}>
                 <Icon name="mail" />
                 <input
                   name="email"
@@ -90,7 +90,7 @@ export function Login() {
               label="Kata sandi demo"
               hint="Gunakan isian contoh. Formulir ini belum memverifikasi akun."
             >
-              <div className="input-with-icon">
+              <div className={styles["input-with-icon"]}>
                 <Icon name="lock" />
                 <input
                   name="password"
@@ -123,7 +123,7 @@ export function Login() {
                 <option>Pekerja lapangan</option>
               </select>
             </Field>
-            <div className="login-options">
+            <div className={styles["login-options"]}>
               <span>
                 <Icon name="shield" size={16} />
                 Data contoh, tanpa akun asli
@@ -145,7 +145,7 @@ export function Login() {
               <Icon name="arrow" size={18} />
             </button>
           </form>
-          <div className="login-divider">
+          <div className={styles["login-divider"]}>
             <span>atau langsung jelajahi</span>
           </div>
           <Link
@@ -154,12 +154,12 @@ export function Login() {
           >
             Lihat dashboard demo <Icon name="arrow" size={18} />
           </Link>
-          <p className="login-footnote">
+          <p className={styles["login-footnote"]}>
             Monitoring tanah, pengelolaan air, dan informasi lahan dalam satu
             tampilan.
           </p>
         </div>
-        <footer className="login-footer">
+        <footer className={styles["login-footer"]}>
           SmartFarm IoT <span>Prototipe MPTI</span>
         </footer>
       </section>

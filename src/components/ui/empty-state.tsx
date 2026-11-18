@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { Icon } from "@/components/ui/icon";
+import type { ReactNode } from "react";
 
 export function EmptyState({
   title,

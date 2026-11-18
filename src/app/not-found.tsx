@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Brand } from "@/components/layout/brand";
+import Link from "next/link";
 
 export default function NotFound() {
   return (

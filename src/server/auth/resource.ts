@@ -1,11 +1,11 @@
-import type { Db, ObjectId } from "mongodb";
 import type { FarmDocument, ZoneDocument } from "@/domain/models";
-import { getCollection } from "@/server/db/collections";
 import {
   assertZoneAccess,
   type AuthenticatedUser,
   type ZoneAction,
 } from "@/server/auth/policy";
+import { getCollection } from "@/server/db/collections";
+import type { Db, ObjectId } from "mongodb";
 
 export async function requireZoneAccess(
   database: Db,

@@ -1,4 +1,4 @@
-import type { Farm, Zone, Notice, IrrigationRule } from "./types";
+import type { Farm, IrrigationRule, Notice, Zone } from "./types";
 
 export const defaultRule: IrrigationRule = {
   enabled: false,

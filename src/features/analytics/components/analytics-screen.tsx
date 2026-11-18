@@ -1,18 +1,15 @@
 "use client";
-
-import { useState } from "react";
-import {
-  SensorChart,
-  type Reading,
-} from "@/features/analytics/components/sensor-chart";
-import { useDemo } from "@/features/demo/demo-provider";
-import { demoReadings } from "@/features/demo/fixtures";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { FarmSelect } from "@/features/farms/components/farm-select";
 import { Field } from "@/components/ui/field";
-import { PageHeading } from "@/components/ui/page-heading";
 import { Icon } from "@/components/ui/icon";
+import { PageHeading } from "@/components/ui/page-heading";
+import styles from "@/features/analytics/analytics.module.css";
+import { SensorChart } from "@/features/analytics/components/sensor-chart";
+import { useDemo } from "@/features/demo/demo-provider";
+import { FarmSelect } from "@/features/farms/components/farm-select";
+import { cn } from "@/lib/cn";
+import { useState } from "react";
 
 export function Analytics() {
   const { zones, farmId, farm, notify } = useDemo();
@@ -26,84 +23,24 @@ export function Analytics() {
     ? zoneId
     : "all";
   const selectedZone = currentZones.find((zone) => zone.id === validZoneId);
-  const badDate =
-    range === "custom" && (!startDate || !endDate || endDate < startDate);
-  const days =
-    range === "7h"
-      ? 7
-      : range === "30h"
-        ? 30
-        : range === "custom" && !badDate
-          ? Math.min(
-              31,
-              Math.floor(
-                (Date.parse(endDate) - Date.parse(startDate)) / 86400000,
-              ) + 1,
-            )
-          : 1;
-  const offset = selectedZone
-    ? Math.round((selectedZone.moisture - 60) / 3)
-    : farmId === "farm-b"
-      ? 4
-      : 0;
-  const readings: Reading[] =
-    range === "24j"
-      ? demoReadings.map((reading) => ({
-          ...reading,
-          moisture: Math.max(0, Math.min(100, reading.moisture + offset)),
-          water: Number(Math.max(0, reading.water + offset / 10).toFixed(1)),
-        }))
-      : Array.from({ length: days }, (_, index) => {
-          const date = new Date(
-            `${range === "custom" ? startDate : "2026-11-18"}T12:00:00Z`,
-          );
-          date.setUTCDate(
-            date.getUTCDate() + (range === "custom" ? index : index - days + 1),
-          );
-          return {
-            time: date.toLocaleDateString("id-ID", {
-              day: "2-digit",
-              month: "short",
-              timeZone: "UTC",
-            }),
-            moisture: 54 + ((index * 7) % 23) + offset,
-            water: Number(
-              (4.2 + ((index * 3) % 26) / 10 + offset / 10).toFixed(1),
-            ),
-          };
-        });
-  const average =
-    readings.reduce((sum, reading) => sum + reading.moisture, 0) /
-    Math.max(1, readings.length);
+  const { readings, badDate, days, average } = createReadingSeries({
+    range,
+    startDate,
+    endDate,
+    farmId,
+    zone: selectedZone,
+  });
   function exportCsv() {
-    const csv =
-      "\uFEFFJenis data,Lahan,Zona,Waktu,Kelembapan (%),Ketinggian air (cm)\r\n" +
-      readings
-        .map((reading) =>
-          [
-            "CONTOH",
-            farm?.name,
-            selectedZone?.name ?? "Semua petak",
-            reading.time,
-            reading.moisture,
-            reading.water,
-          ]
-            .map((value) => {
-              const text = String(value ?? "");
-              const safe = /^[=+@\-\t\r]/.test(text) ? `'${text}` : text;
-              return `"${safe.replaceAll('"', '""')}"`;
-            })
-            .join(","),
-        )
-        .join("\r\n");
-    const url = URL.createObjectURL(
-      new Blob([csv], { type: "text/csv;charset=utf-8;" }),
+    const csv = createReportCsv({
+      farmName: farm?.name,
+      zoneName: selectedZone?.name,
+      readings,
+    });
+    downloadTextFile(
+      csv,
+      `smartfarm-data-contoh-${range}.csv`,
+      "text/csv;charset=utf-8;",
     );
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `smartfarm-data-contoh-${range}.csv`;
-    link.click();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     notify("Laporan CSV data contoh berhasil diunduh.");
   }
   return (
@@ -149,8 +86,8 @@ export function Analytics() {
         </section>
       ) : (
         <>
-          <div className="analytics-summary">
-            <section className="panel summary-metric">
+          <div className={styles["analytics-summary"]}>
+            <section className={cn("panel", styles["summary-metric"])}>
               <span className="icon-tile">
                 <Icon name="leaf" />
               </span>
@@ -163,7 +100,7 @@ export function Analytics() {
                 <span>Ringkasan data contoh</span>
               </div>
             </section>
-            <section className="panel summary-metric">
+            <section className={cn("panel", styles["summary-metric"])}>
               <span className="icon-tile blue">
                 <Icon name="drop" />
               </span>
@@ -181,7 +118,7 @@ export function Analytics() {
                 <span>Skala miniatur sawah</span>
               </div>
             </section>
-            <section className="panel summary-metric">
+            <section className={cn("panel", styles["summary-metric"])}>
               <span className="icon-tile">
                 <Icon name="chart" />
               </span>
@@ -199,7 +136,7 @@ export function Analytics() {
               </div>
             </section>
           </div>
-          <section className="panel analytics-chart">
+          <section className={cn("panel", styles["analytics-chart"])}>
             <div className="panel-title">
               <div>
                 <h2>Tren kondisi lahan</h2>
@@ -209,7 +146,7 @@ export function Analytics() {
               </div>
               <Badge tone="neutral">Data contoh</Badge>
             </div>
-            <div className="chart-toolbar">
+            <div className={styles["chart-toolbar"]}>
               <div className="segmented" aria-label="Rentang waktu">
                 {[
                   ["24j", "24 jam"],
@@ -227,7 +164,7 @@ export function Analytics() {
                   </button>
                 ))}
               </div>
-              <label className="metric-select">
+              <label className={styles["metric-select"]}>
                 <span className="sr-only">Jenis pembacaan</span>
                 <select
                   aria-label="Jenis pembacaan"
@@ -242,7 +179,7 @@ export function Analytics() {
               </label>
             </div>
             {range === "custom" && (
-              <div className="custom-date-fields">
+              <div className={styles["custom-date-fields"]}>
                 <Field label="Dari tanggal">
                   <input
                     type="date"
@@ -279,13 +216,13 @@ export function Analytics() {
               />
             )}
           </section>
-          <div className="analytics-bottom">
+          <div className={styles["analytics-bottom"]}>
             <section className="panel">
               <div className="panel-title">
                 <h2>Contoh aktivitas irigasi</h2>
                 <Badge tone="neutral">3 aktivitas</Badge>
               </div>
-              <div className="activity-list">
+              <div className={styles["activity-list"]}>
                 {[
                   {
                     title: "Irigasi manual selesai",
@@ -306,8 +243,8 @@ export function Analytics() {
                     icon: "shield" as const,
                   },
                 ].map((event) => (
-                  <div className="activity-item" key={event.title}>
-                    <span className="activity-icon">
+                  <div className={styles["activity-item"]} key={event.title}>
+                    <span className={styles["activity-icon"]}>
                       <Icon name={event.icon} size={16} />
                     </span>
                     <div>
@@ -319,7 +256,7 @@ export function Analytics() {
                 ))}
               </div>
             </section>
-            <section className="export-panel">
+            <section className={styles["export-panel"]}>
               <span className="icon-tile">
                 <Icon name="download" size={25} />
               </span>
@@ -336,13 +273,13 @@ export function Analytics() {
                 <Icon name="download" size={17} />
                 Unduh CSV
               </button>
-              <p className="export-note">
+              <p className={styles["export-note"]}>
                 Untuk PDF, pilih “Cetak laporan”, lalu simpan sebagai PDF
                 melalui browser.
               </p>
             </section>
           </div>
-          <p className="print-note">
+          <p className={styles["print-note"]}>
             Laporan pratinjau SmartFarm IoT. Seluruh angka merupakan data contoh
             dan bukan hasil pengukuran fisik.
           </p>
@@ -351,3 +288,7 @@ export function Analytics() {
     </>
   );
 }
+
+import { downloadTextFile } from "@/lib/download-file";
+import { createReadingSeries } from "../lib/reading-series";
+import { createReportCsv } from "../lib/report-csv";

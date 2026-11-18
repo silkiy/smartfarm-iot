@@ -1,11 +1,12 @@
 "use client";
-
-import { useState, type FormEvent } from "react";
-import { useDemo } from "@/features/demo/demo-provider";
-import type { IrrigationRule } from "@/features/demo/types";
-import { defaultRule } from "@/features/demo/fixtures";
 import { Field } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
+import { useDemo } from "@/features/demo/demo-provider";
+import { defaultRule } from "@/features/demo/fixtures";
+import type { IrrigationRule } from "@/features/demo/types";
+import styles from "@/features/irrigation/irrigation.module.css";
+import { cn } from "@/lib/cn";
+import { useState, type FormEvent } from "react";
 
 export function RuleForm({ zoneId }: { zoneId: string }) {
   const { rules, setRules, role, notify } = useDemo();
@@ -21,7 +22,7 @@ export function RuleForm({ zoneId }: { zoneId: string }) {
     );
   }
   return (
-    <form className="panel rule-panel" onSubmit={save}>
+    <form className={cn("panel", styles["rule-panel"])} onSubmit={save}>
       <div className="panel-title">
         <div>
           <h2>Aturan irigasi otomatis</h2>
@@ -39,14 +40,14 @@ export function RuleForm({ zoneId }: { zoneId: string }) {
           <span />
         </button>
       </div>
-      <div className="rule-description">
+      <div className={styles["rule-description"]}>
         <Icon name="info" size={17} />
         <p>
           Pengaturan ini merupakan simulasi. Nilai ambang akan dikalibrasi pada
           miniatur sawah.
         </p>
       </div>
-      <fieldset disabled={readonly} className="form-fieldset">
+      <fieldset disabled={readonly} className={styles["form-fieldset"]}>
         <Field label="Fase pertumbuhan">
           <select
             value={draft.phase}
@@ -105,7 +106,7 @@ export function RuleForm({ zoneId }: { zoneId: string }) {
             }
           />
         </Field>
-        <div className="rule-preview">
+        <div className={styles["rule-preview"]}>
           <Icon name="settings" size={20} />
           <p>
             Di bawah <strong>{draft.threshold}%</strong>, evaluasi kebutuhan

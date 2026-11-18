@@ -1,15 +1,16 @@
 "use client";
-
-import { useState } from "react";
-import Link from "next/link";
-import { useDemo } from "@/features/demo/demo-provider";
-import { RuleForm } from "@/features/irrigation/components/irrigation-rule-form";
 import { Badge } from "@/components/ui/badge";
 import { Dialog } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
-import { FarmSelect } from "@/features/farms/components/farm-select";
-import { PageHeading } from "@/components/ui/page-heading";
 import { Icon } from "@/components/ui/icon";
+import { PageHeading } from "@/components/ui/page-heading";
+import { useDemo } from "@/features/demo/demo-provider";
+import { FarmSelect } from "@/features/farms/components/farm-select";
+import { RuleForm } from "@/features/irrigation/components/irrigation-rule-form";
+import styles from "@/features/irrigation/irrigation.module.css";
+import { cn } from "@/lib/cn";
+import Link from "next/link";
+import { useState } from "react";
 
 export function Irrigation() {
   const {
@@ -82,7 +83,7 @@ export function Irrigation() {
               </p>
             </div>
           )}
-          <div className="irrigation-layout">
+          <div className={styles["irrigation-layout"]}>
             <div>
               <div
                 className="segmented mode-switch"
@@ -107,7 +108,10 @@ export function Irrigation() {
               </div>
               {mode === "manual" ? (
                 <section
-                  className={`panel irrigation-control${running ? " irrigation-running" : ""}`}
+                  className={cn(
+                    cn("panel", styles["irrigation-control"]),
+                    running ? styles["irrigation-running"] : "",
+                  )}
                 >
                   <div className="panel-title">
                     <h2>{zone.name}</h2>
@@ -117,7 +121,7 @@ export function Irrigation() {
                         : "Perangkat terputus"}
                     </Badge>
                   </div>
-                  <div className="large-pump-icon">
+                  <div className={styles["large-pump-icon"]}>
                     <Icon name="drop" size={46} />
                   </div>
                   <h2>
@@ -130,7 +134,7 @@ export function Irrigation() {
                       ? "Hitung mundur simulasi. Pompa akan berhenti otomatis."
                       : "Mulai irigasi saat petak membutuhkan tambahan air."}
                   </p>
-                  <div className="control-status">
+                  <div className={styles["control-status"]}>
                     <div>
                       <span>Pompa</span>
                       <strong>
@@ -146,13 +150,13 @@ export function Irrigation() {
                     </div>
                     <div>
                       <span>{running ? "Sisa waktu" : "Durasi"}</span>
-                      <strong className="timer-number">
+                      <strong className={styles["timer-number"]}>
                         {running ? remaining : duration}
                         <small>detik</small>
                       </strong>
                     </div>
                   </div>
-                  <div className="duration-options">
+                  <div className={styles["duration-options"]}>
                     <span>Durasi simulasi</span>
                     <div>
                       {[5, 10, 15].map((seconds) => (
@@ -191,12 +195,12 @@ export function Irrigation() {
                     </button>
                   )}
                   {!zone.online && (
-                    <p className="control-helper">
+                    <p className={styles["control-helper"]}>
                       Kontrol dinonaktifkan karena data perangkat sudah lama.
                     </p>
                   )}
                   {runningZone && !running && (
-                    <p className="control-helper">
+                    <p className={styles["control-helper"]}>
                       Simulasi sedang berjalan di zona lain. Hentikan terlebih
                       dahulu.
                     </p>
@@ -206,13 +210,13 @@ export function Irrigation() {
                 <RuleForm key={zone.id} zoneId={zone.id} />
               )}
             </div>
-            <aside className="irrigation-aside">
+            <aside className={styles["irrigation-aside"]}>
               <section className="panel">
                 <div className="panel-title">
                   <h2>Kondisi petak</h2>
                   <Icon name="sensor" />
                 </div>
-                <div className="condition-stat">
+                <div className={styles["condition-stat"]}>
                   <span>
                     <Icon name="leaf" />
                     Kelembapan tanah
@@ -222,7 +226,7 @@ export function Irrigation() {
                     <small>%</small>
                   </strong>
                 </div>
-                <div className="condition-stat">
+                <div className={styles["condition-stat"]}>
                   <span>
                     <Icon name="drop" />
                     Ketinggian air
@@ -238,7 +242,7 @@ export function Irrigation() {
                     : "Data lama · 10 menit lalu"}
                 </p>
               </section>
-              <section className="safety-panel">
+              <section className={styles["safety-panel"]}>
                 <span className="icon-tile">
                   <Icon name="shield" size={24} />
                 </span>

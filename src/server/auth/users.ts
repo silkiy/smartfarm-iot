@@ -1,6 +1,6 @@
 import type { ProfileDocument } from "@/domain/models";
-import { getMongoDatabase } from "@/server/db/mongodb";
 import { getCollection } from "@/server/db/collections";
+import { getMongoDatabase } from "@/server/db/mongodb";
 
 export async function findProfileByEmail(
   email: string,

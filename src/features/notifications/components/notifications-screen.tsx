@@ -1,12 +1,13 @@
 "use client";
-
-import { useState } from "react";
-import { useDemo } from "@/features/demo/demo-provider";
 import { Badge } from "@/components/ui/badge";
 import { Dialog } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageHeading } from "@/components/ui/page-heading";
 import { Icon } from "@/components/ui/icon";
+import { PageHeading } from "@/components/ui/page-heading";
+import { useDemo } from "@/features/demo/demo-provider";
+import styles from "@/features/notifications/notifications.module.css";
+import { cn } from "@/lib/cn";
+import { useState } from "react";
 
 export function Notifications() {
   const { notices, setNotices, preferences, setPreferences, role, notify } =
@@ -56,16 +57,19 @@ export function Notifications() {
           Tandai semua dibaca
         </button>
       </PageHeading>
-      <div className="notifications-layout">
-        <div className="notifications-main">
-          <section className="panel notification-feed">
+      <div className={styles["notifications-layout"]}>
+        <div className={styles["notifications-main"]}>
+          <section className={cn("panel", styles["notification-feed"])}>
             <div className="panel-title">
               <h2>Kabar dari lahan Anda</h2>
               <Badge tone={unread ? "amber" : "neutral"}>
                 {unread} belum dibaca
               </Badge>
             </div>
-            <div className="filter-tabs" aria-label="Filter notifikasi">
+            <div
+              className={styles["filter-tabs"]}
+              aria-label="Filter notifikasi"
+            >
               {["Semua", "Belum dibaca", "Peringatan", "Irigasi", "Sistem"].map(
                 (value) => (
                   <button
@@ -89,10 +93,16 @@ export function Notifications() {
                 {filtered.map((notice) => (
                   <article
                     key={notice.id}
-                    className={`notice-item${notice.read ? " notice-read" : ""}`}
+                    className={cn(
+                      styles["notice-item"],
+                      notice.read ? styles["notice-read"] : "",
+                    )}
                   >
                     <span
-                      className={`icon-tile small ${notice.category === "Peringatan" ? "amber" : ""}`}
+                      className={cn(
+                        "icon-tile small ",
+                        notice.category === "Peringatan" ? styles["amber"] : "",
+                      )}
                     >
                       <Icon
                         name={
@@ -105,17 +115,17 @@ export function Notifications() {
                         size={18}
                       />
                     </span>
-                    <div className="notice-content">
-                      <div className="notice-title">
+                    <div className={styles["notice-content"]}>
+                      <div className={styles["notice-title"]}>
                         <h3>{notice.title}</h3>
                         {!notice.read && (
-                          <span className="unread-indicator">
+                          <span className={styles["unread-indicator"]}>
                             <span className="sr-only">Belum dibaca</span>
                           </span>
                         )}
                       </div>
                       <p>{notice.message}</p>
-                      <div className="notice-meta">
+                      <div className={styles["notice-meta"]}>
                         <span>
                           {notice.category} · {notice.time}
                         </span>
@@ -143,8 +153,8 @@ export function Notifications() {
             )}
           </section>
         </div>
-        <aside className="notifications-aside">
-          <section className="panel whatsapp-panel">
+        <aside className={styles["notifications-aside"]}>
+          <section className={cn("panel", styles["whatsapp-panel"])}>
             <div className="panel-title">
               <span className="icon-tile">
                 <Icon name="message" size={24} />
@@ -155,7 +165,7 @@ export function Notifications() {
             <p>
               Informasi penting tentang sawah, langsung dalam percakapan Anda.
             </p>
-            <div className="whatsapp-status">
+            <div className={styles["whatsapp-status"]}>
               <span className="status-dot" />
               <span>Nomor penerima belum diatur</span>
             </div>
@@ -168,7 +178,7 @@ export function Notifications() {
             </button>
             <small>Pratinjau ini tidak mengirim pesan WhatsApp.</small>
           </section>
-          <section className="panel preference-panel">
+          <section className={cn("panel", styles["preference-panel"])}>
             <h2>Preferensi pemberitahuan</h2>
             <p>Pengaturan lokal untuk sesi demo ini.</p>
             {[
@@ -183,7 +193,7 @@ export function Notifications() {
                 description: "Tersimpan sebagai pilihan demo",
               },
             ].map((preference) => (
-              <div className="preference-row" key={preference.key}>
+              <div className={styles["preference-row"]} key={preference.key}>
                 <div>
                   <h3>{preference.title}</h3>
                   <p>{preference.description}</p>
@@ -228,7 +238,7 @@ export function Notifications() {
           onClose={() => setPreview(false)}
         >
           <Badge tone="neutral">Pesan contoh · tidak dikirim</Badge>
-          <div className="message-preview">
+          <div className={styles["message-preview"]}>
             <div>
               <Icon name="leaf" size={17} />
               <strong>SmartFarm IoT</strong>

@@ -1,42 +1,20 @@
 "use client";
-
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
-import { useDemo } from "@/features/demo/demo-provider";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { FarmSelect } from "@/features/farms/components/farm-select";
-import { PageHeading } from "@/components/ui/page-heading";
 import { Icon } from "@/components/ui/icon";
-
-function Gauge({ value }: { value: number }) {
-  return (
-    <div className="gauge">
-      <svg viewBox="0 0 180 180" aria-hidden="true">
-        <circle cx="90" cy="90" r="74" className="gauge-track" />
-        <circle
-          cx="90"
-          cy="90"
-          r="74"
-          className="gauge-value"
-          strokeDasharray={`${value * 4.65} 465`}
-        />
-      </svg>
-      <div className="gauge-label">
-        <strong>
-          {value}
-          <span>%</span>
-        </strong>
-        <span>Kelembapan rata-rata</span>
-      </div>
-    </div>
-  );
-}
+import { PageHeading } from "@/components/ui/page-heading";
+import styles from "@/features/dashboard/dashboard.module.css";
+import { useDemo } from "@/features/demo/demo-provider";
+import { FarmSelect } from "@/features/farms/components/farm-select";
+import { cn } from "@/lib/cn";
+import Link from "next/link";
+import { useState } from "react";
+import { FarmOverview } from "./farm-overview";
+import { Gauge } from "./moisture-gauge";
+import { ZoneCard } from "./zone-card";
 
 export function Dashboard() {
-  const { farm, farmId, zones, runningZone, notify, setSelectedZoneId } =
-    useDemo();
+  const { farm, farmId, zones, runningZone, notify } = useDemo();
   const [refreshing, setRefreshing] = useState(false);
   const currentZones = zones.filter((zone) => zone.farmId === farmId);
   const onlineZones = currentZones.filter((zone) => zone.online);
@@ -65,7 +43,6 @@ export function Dashboard() {
       );
     }, 600);
   }
-
   return (
     <>
       <PageHeading
@@ -77,13 +54,13 @@ export function Dashboard() {
           onClick={refresh}
           disabled={refreshing}
         >
-          <Icon name="refresh" className={refreshing ? "spin" : ""} />
+          <Icon name="refresh" className={refreshing ? styles["spin"] : ""} />
           {refreshing ? "Memuat…" : "Perbarui"}
         </button>
       </PageHeading>
       <div className="section-toolbar">
         <FarmSelect />
-        <span className="muted timestamp">
+        <span className={cn("muted", styles["timestamp"])}>
           <Icon name="clock" size={15} />
           Data contoh · 10.45 WIB
         </span>
@@ -102,72 +79,9 @@ export function Dashboard() {
         </section>
       ) : (
         <>
-          <div className="overview-grid">
-            <section className="farm-hero">
-              <Image
-                src="/images/rice-fields.jpg"
-                alt="Hamparan sawah hijau sebagai ilustrasi lahan"
-                fill
-                sizes="(min-width: 1100px) 55vw, 100vw"
-                priority
-              />
-              <div className="farm-hero-shade" />
-              <div className="farm-hero-content">
-                <span className="photo-label">
-                  <Icon name="leaf" size={15} />
-                  Sawah Anda, terpantau
-                </span>
-                <div>
-                  <p className="hero-location">
-                    <Icon name="pin" size={16} />
-                    {farm.location}
-                  </p>
-                  <h2>{farm.name}</h2>
-                  <div className="hero-details">
-                    <span>{farm.area} m²</span>
-                    <span>{currentZones.length} zona</span>
-                    <span>Fase {farm.phase.toLowerCase()}</span>
-                  </div>
-                </div>
-                <Link href="/lahan" className="hero-link">
-                  Lihat detail lahan <Icon name="arrow" size={18} />
-                </Link>
-              </div>
-            </section>
-            <section className="weather-panel">
-              <div className="panel-title">
-                <h2>Cuaca sekitar lahan</h2>
-                <Badge tone="neutral">Contoh</Badge>
-              </div>
-              <div className="weather-main">
-                <div>
-                  <strong>
-                    28<span>°C</span>
-                  </strong>
-                  <p>Cerah berawan</p>
-                </div>
-                <div className="weather-art">
-                  <Icon name="sun" size={65} />
-                  <Icon name="cloud" size={62} />
-                </div>
-              </div>
-              <div className="weather-details">
-                <span>
-                  <Icon name="drop" size={17} />
-                  Kelembapan <strong>76%</strong>
-                </span>
-                <span>
-                  <Icon name="wind" size={17} />
-                  Angin <strong>8 km/j</strong>
-                </span>
-              </div>
-              <p className="weather-note">
-                Ilustrasi cuaca untuk {farm.location}
-              </p>
-            </section>
-          </div>
-          <div className="metrics-grid">
-            <section className="panel moisture-panel">
+          <FarmOverview farm={farm} zoneCount={currentZones.length} />
+          <div className={styles["metrics-grid"]}>
+            <section className={cn("panel", styles["moisture-panel"])}>
               <div className="panel-title">
                 <h2>Kelembapan tanah</h2>
                 <span className="icon-tile small">
@@ -177,7 +91,7 @@ export function Dashboard() {
               {onlineZones.length ? (
                 <>
                   <Gauge value={average} />
-                  <div className="metric-foot">
+                  <div className={styles["metric-foot"]}>
                     <Badge tone={average < 40 ? "amber" : "green"}>
                       {average < 40 ? "Perlu perhatian" : "Kondisi terpantau"}
                     </Badge>
@@ -191,24 +105,24 @@ export function Dashboard() {
                 />
               )}
             </section>
-            <section className="panel water-panel">
+            <section className={cn("panel", styles["water-panel"])}>
               <div className="panel-title">
                 <h2>Ketinggian air</h2>
                 <span className="icon-tile small blue">
                   <Icon name="drop" />
                 </span>
               </div>
-              <div className="water-visual">
-                <div className="water-scale">
+              <div className={styles["water-visual"]}>
+                <div className={styles["water-scale"]}>
                   <span>20 cm</span>
                   <span>10 cm</span>
                   <span>0 cm</span>
                 </div>
-                <div className="water-tank">
-                  <div className="water-fill" />
+                <div className={styles["water-tank"]}>
+                  <div className={styles["water-fill"]} />
                   <Icon name="drop" size={28} />
                 </div>
-                <div className="water-reading">
+                <div className={styles["water-reading"]}>
                   <strong>
                     {water}
                     <span>cm</span>
@@ -217,14 +131,14 @@ export function Dashboard() {
                   <span className="muted">Skala miniatur 0–20 cm</span>
                 </div>
               </div>
-              <div className="metric-foot">
+              <div className={styles["metric-foot"]}>
                 <span className="muted">
                   <Icon name="info" size={15} />
                   Ambang mengikuti kalibrasi
                 </span>
               </div>
             </section>
-            <section className="panel pump-panel">
+            <section className={cn("panel", styles["pump-panel"])}>
               <div className="panel-title">
                 <h2>Status irigasi</h2>
                 <span className="icon-tile small">
@@ -232,7 +146,10 @@ export function Dashboard() {
                 </span>
               </div>
               <div
-                className={`pump-indicator${farmRunning ? " pump-active" : ""}`}
+                className={cn(
+                  styles["pump-indicator"],
+                  farmRunning ? styles["pump-active"] : "",
+                )}
               >
                 <Icon name="drop" size={32} />
               </div>
@@ -241,7 +158,7 @@ export function Dashboard() {
                   ? "Air sedang mengalir"
                   : "Irigasi sedang berhenti"}
               </h3>
-              <div className="actuator-row">
+              <div className={styles["actuator-row"]}>
                 <span>
                   Pompa <strong>{farmRunning ? "Menyala" : "Mati"}</strong>
                 </span>
@@ -258,7 +175,7 @@ export function Dashboard() {
             </section>
           </div>
           {(dry > 0 || onlineZones.length < currentZones.length) && (
-            <div className="attention-note">
+            <div className={styles["attention-note"]}>
               <Icon name="alert" size={21} />
               <div>
                 <strong>
@@ -277,7 +194,7 @@ export function Dashboard() {
               </Link>
             </div>
           )}
-          <div className="section-title">
+          <div className={styles["section-title"]}>
             <div>
               <h2>Kondisi setiap petak</h2>
               <p>Dua pembacaan sensor untuk keputusan yang lebih jelas.</p>
@@ -286,79 +203,9 @@ export function Dashboard() {
               {onlineZones.length}/{currentZones.length} perangkat aktif
             </Badge>
           </div>
-          <div className="zones-grid">
+          <div className={styles["zones-grid"]}>
             {currentZones.map((zone, index) => (
-              <section
-                className={`panel zone-card${!zone.online ? " zone-offline" : ""}`}
-                key={zone.id}
-              >
-                <div className="panel-title">
-                  <div className="zone-name">
-                    <span className="zone-number">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <h3>{zone.name}</h3>
-                  </div>
-                  <Badge
-                    tone={
-                      !zone.online
-                        ? "neutral"
-                        : zone.moisture < 40
-                          ? "amber"
-                          : "green"
-                    }
-                  >
-                    {!zone.online
-                      ? "Terputus"
-                      : zone.moisture < 40
-                        ? "Mulai kering"
-                        : "Cukup air"}
-                  </Badge>
-                </div>
-                <div className="zone-readings">
-                  <div>
-                    <span>
-                      <Icon name="leaf" size={15} />
-                      Kelembapan
-                    </span>
-                    <strong>
-                      {zone.hasReading === false ? "—" : zone.moisture}
-                      {zone.hasReading !== false && <small>%</small>}
-                    </strong>
-                  </div>
-                  <div>
-                    <span>
-                      <Icon name="drop" size={15} />
-                      Level air
-                    </span>
-                    <strong>
-                      {zone.hasReading === false
-                        ? "—"
-                        : zone.water.toFixed(1).replace(".", ",")}
-                      {zone.hasReading !== false && <small>cm</small>}
-                    </strong>
-                  </div>
-                </div>
-                <div className="zone-footer">
-                  <span className="muted">
-                    <span
-                      className={`status-dot ${zone.online ? "green-dot" : "grey-dot"}`}
-                    />
-                    {zone.hasReading === false
-                      ? "Belum ada pembacaan"
-                      : zone.online
-                        ? "Data contoh · 10.45 WIB"
-                        : "Data lama · 10 menit lalu"}
-                  </span>
-                  <Link
-                    href="/irigasi"
-                    onClick={() => setSelectedZoneId(zone.id)}
-                    aria-label={`Kontrol irigasi ${zone.name}`}
-                  >
-                    <Icon name="arrow" size={18} />
-                  </Link>
-                </div>
-              </section>
+              <ZoneCard key={zone.id} zone={zone} index={index} />
             ))}
           </div>
         </>

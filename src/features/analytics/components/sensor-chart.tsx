@@ -1,10 +1,9 @@
 "use client";
-
-import { useId, useState } from "react";
 import { Icon } from "@/components/ui/icon";
+import styles from "@/features/analytics/analytics.module.css";
+import { useId, useState } from "react";
 
-export type Reading = { time: string; moisture: number; water: number };
-
+import type { Reading } from "../types";
 export function SensorChart({
   readings,
   metric,
@@ -30,7 +29,7 @@ export function SensorChart({
     point !== null ? readings[point] : readings[readings.length - 1];
   return (
     <>
-      <div className="chart-wrap">
+      <div className={styles["chart-wrap"]}>
         <svg
           viewBox="0 0 640 250"
           role="img"
@@ -99,7 +98,7 @@ export function SensorChart({
             })}
         </svg>
       </div>
-      <div className="chart-inspector">
+      <div className={styles["chart-inspector"]}>
         <Icon name="clock" size={16} />
         <span>
           {selected?.time}{" "}

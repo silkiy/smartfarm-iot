@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useRef, type ReactNode } from "react";
 import { Icon } from "@/components/ui/icon";
+import { useEffect, useRef, type ReactNode } from "react";
 
 export function Dialog({
   title,

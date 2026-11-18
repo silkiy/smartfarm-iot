@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { getMongoDatabase } from "../src/server/db/mongodb";
 import { collectionNames, type ProfileDocument } from "../src/domain/models";
 import { hashPassword } from "../src/server/auth/passwords";
+import { getMongoDatabase } from "../src/server/db/mongodb";
 
 const email = process.env.ADMIN_BOOTSTRAP_EMAIL?.trim().toLowerCase();
 const password = process.env.ADMIN_BOOTSTRAP_PASSWORD;

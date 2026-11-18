@@ -1,5 +1,5 @@
-import type { Db } from "mongodb";
 import { collectionNames } from "@/domain/models";
+import type { Db } from "mongodb";
 
 export async function ensureDatabaseIndexes(database: Db): Promise<void> {
   await Promise.all([
