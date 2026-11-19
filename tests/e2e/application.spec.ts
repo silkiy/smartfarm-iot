@@ -3,18 +3,8 @@ import { expect, test, type APIRequestContext } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { readAccounts } from "./global-setup";
+import { login } from "./helpers";
 const base = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3120";
-async function login(request: APIRequestContext, index: number) {
-  const account = (await readAccounts())[index];
-  const { csrfToken } = await (await request.get("/api/auth/csrf")).json();
-  await request.post("/api/auth/callback/credentials", {
-    form: { csrfToken, email: account.email, password: account.password },
-    headers: { Origin: base, "X-Auth-Return-Redirect": "1" },
-  });
-  expect((await (await request.get("/api/auth/session")).json()).user?.id).toBe(
-    account.userId,
-  );
-}
 async function resources(): Promise<{
   farmId: string;
   zoneId: string;

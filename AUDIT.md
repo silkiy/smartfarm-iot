@@ -8,6 +8,8 @@ Verifikasi pembaruan: format, lint, TypeScript, build produksi, 32 unit test dan
 
 ## Temuan yang diperbaiki
 
+Audit UI berikutnya mencakup seluruh halaman, dialog dan keadaan data, bukan hanya screenshot laporan awal. Cakupan, perbaikan komponen bersama dan bukti pengujiannya dirinci pada [UI_AUDIT.md](UI_AUDIT.md).
+
 Perbaikan tampilan lanjutan berdasarkan screenshot: jarak antarpanel dan grup
 form kini memakai token bersama; tombol profil diberi jeda; daftar pengguna,
 pilihan pekerja dan pagination memakai tata letak khusus. Halaman pengguna

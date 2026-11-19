@@ -80,6 +80,15 @@ pengiriman WhatsApp memerlukan konfigurasi dan tindakan uji yang eksplisit.
 ## Styling
 
 - `styles/tokens.css`: warna, border, radius, skala jarak 4–32 px dan nilai tema bersama.
+- Teks informasi memakai ukuran minimal 12 px; label kecil pada logo merupakan
+  bagian identitas visual. Aksi utama memiliki target interaksi minimal 44 px,
+  dan input ponsel memakai 16 px. Nama/data panjang harus membungkus dalam panel.
+- `Dialog` memisahkan header, body yang dapat digulir, dan `footer` opsional.
+  Tombol submit di footer formulir memakai atribut HTML `form` yang mengarah
+  ke ID form; jangan memasukkan footer kembali ke body yang ikut tergulir.
+- `WorkspaceStatus` menyatukan tampilan loading dan pemulihan request. Boundary
+  `app/(preview)/error.tsx` memakai prop `retry` sesuai versi Next.js terpasang
+  untuk kegagalan render. Pesan internal exception tidak ditampilkan ke pengguna.
 - `styles/primitives.css`: class bersama untuk tombol, panel, field, badge,
   dialog, dan susunan umum. Ini adalah kontrak visual aplikasi.
 - Gunakan `page-stack` untuk jarak antarbagian halaman (24 px), `stack` untuk
