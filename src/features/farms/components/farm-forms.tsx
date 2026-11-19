@@ -4,7 +4,7 @@ import { Field } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import type { Farm, Zone } from "@/features/workspace/types";
-import { type FormEvent } from "react";
+import { useId, useState, type FormEvent } from "react";
 
 export function FarmForm({
   farm,
@@ -14,8 +14,11 @@ export function FarmForm({
   onClose: () => void;
 }) {
   const { saveFarm, busy } = useWorkspace();
+  const formId = useId();
+  const [error, setError] = useState("");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError("");
     const form = new FormData(event.currentTarget);
     const next = {
       name: String(form.get("name")).trim(),
@@ -32,14 +35,46 @@ export function FarmForm({
     };
     if (!next.name || !next.location) return;
     if (await saveFarm(next, farm?.id)) onClose();
+    else
+      setError(
+        "Lahan belum tersimpan. Periksa isian dan koneksi, lalu coba lagi.",
+      );
   }
   return (
-    <Dialog title={farm ? "Ubah lahan" : "Tambah lahan"} onClose={onClose}>
+    <Dialog
+      title={farm ? "Ubah lahan" : "Tambah lahan"}
+      onClose={onClose}
+      footer={
+        <div className="dialog-actions">
+          <button
+            className="button button-secondary"
+            type="button"
+            onClick={onClose}
+          >
+            Batal
+          </button>
+          <button
+            className="button button-primary"
+            type="submit"
+            form={formId}
+            disabled={busy}
+          >
+            <Icon name="check" size={16} />
+            {busy ? "Menyimpan…" : "Simpan lahan"}
+          </button>
+        </div>
+      }
+    >
       <p>
         Simpan informasi lahan Anda. Koordinat opsional digunakan untuk
         informasi cuaca.
       </p>
-      <form onSubmit={submit}>
+      <form id={formId} onSubmit={submit} className="form-stack">
+        {error && (
+          <div className="info-banner" role="alert">
+            {error}
+          </div>
+        )}
         <Field label="Nama lahan">
           <input
             name="name"
@@ -106,23 +141,6 @@ export function FarmForm({
             />
           </Field>
         </div>
-        <div className="dialog-actions">
-          <button
-            className="button button-secondary"
-            type="button"
-            onClick={onClose}
-          >
-            Batal
-          </button>
-          <button
-            className="button button-primary"
-            type="submit"
-            disabled={busy}
-          >
-            <Icon name="check" size={16} />
-            {busy ? "Menyimpan…" : "Simpan lahan"}
-          </button>
-        </div>
       </form>
     </Dialog>
   );
@@ -137,17 +155,51 @@ export function ZoneForm({
   onClose: () => void;
 }) {
   const { saveZone, busy } = useWorkspace();
+  const formId = useId();
+  const [error, setError] = useState("");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError("");
     const form = new FormData(event.currentTarget);
     const name = String(form.get("name")).trim();
     if (!name) return;
     if (await saveZone(farmId, name, zone?.id)) onClose();
+    else
+      setError(
+        "Zona belum tersimpan. Periksa isian dan koneksi, lalu coba lagi.",
+      );
   }
   return (
-    <Dialog title={zone ? "Ubah zona" : "Tambah zona"} onClose={onClose}>
+    <Dialog
+      title={zone ? "Ubah zona" : "Tambah zona"}
+      onClose={onClose}
+      footer={
+        <div className="dialog-actions">
+          <button
+            className="button button-secondary"
+            type="button"
+            onClick={onClose}
+          >
+            Batal
+          </button>
+          <button
+            className="button button-primary"
+            type="submit"
+            form={formId}
+            disabled={busy}
+          >
+            Simpan zona
+          </button>
+        </div>
+      }
+    >
       <p>Zona membantu Anda memantau dan mengatur setiap bagian lahan.</p>
-      <form onSubmit={submit}>
+      <form id={formId} onSubmit={submit} className="form-stack">
+        {error && (
+          <div className="info-banner" role="alert">
+            {error}
+          </div>
+        )}
         <Field label="Nama zona">
           <input
             name="name"
@@ -167,22 +219,6 @@ export function ZoneForm({
             </p>
           </div>
         )}
-        <div className="dialog-actions">
-          <button
-            className="button button-secondary"
-            type="button"
-            onClick={onClose}
-          >
-            Batal
-          </button>
-          <button
-            className="button button-primary"
-            type="submit"
-            disabled={busy}
-          >
-            Simpan zona
-          </button>
-        </div>
       </form>
     </Dialog>
   );

@@ -22,6 +22,7 @@ export function FarmCard({
   return (
     <section
       data-testid="farm-card"
+      data-selected={farmId === farm.id}
       className={styles["farm-card"]}
       key={farm.id}
     >
@@ -163,6 +164,7 @@ export function FarmCard({
           </span>
           <button
             className="text-link"
+            aria-pressed={farmId === farm.id}
             onClick={() => {
               setFarmId(farm.id);
               notify(`${farm.name} dipilih untuk dashboard dan irigasi.`);
