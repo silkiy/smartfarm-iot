@@ -14,5 +14,12 @@
   --red-bg: #fff1ef;
   --blue: #277489;
   --radius: 16px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
   color-scheme: light;
 }
