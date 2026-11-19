@@ -73,15 +73,23 @@ public/images/                 Foto lokal yang digunakan frontend
 - Modul database/password juga dipakai script administrator di Node.js. Jangan
   menaruh akses database atau secret ke komponen client demi kemudahan impor.
 
-Frontend masih berupa pratinjau. Role selector bukan otorisasi; formulir masuk
-belum melakukan autentikasi; timer tidak mengeksekusi pompa fisik; pratinjau
-WhatsApp tidak mengirim pesan. Otorisasi backend yang sudah ada tetap terpisah.
+Frontend memakai sesi Auth.js dan data MongoDB melalui API. Peran ditentukan
+profil database. Kontrol perangkat dan eksekusi otomatis menunggu hardware;
+pengiriman WhatsApp memerlukan konfigurasi dan tindakan uji yang eksplisit.
 
 ## Styling
 
-- `styles/tokens.css`: warna, border, radius, dan nilai tema bersama.
+- `styles/tokens.css`: warna, border, radius, skala jarak 4–32 px dan nilai tema bersama.
 - `styles/primitives.css`: class bersama untuk tombol, panel, field, badge,
   dialog, dan susunan umum. Ini adalah kontrak visual aplikasi.
+- Gunakan `page-stack` untuk jarak antarbagian halaman (24 px), `stack` untuk
+  grup isi panel, dan `form-stack` untuk jarak antarisian (20 px). Gunakan
+  `form-actions` untuk tombol yang sejajar; jangan memakai toolbar sebagai
+  tata letak checkbox. Detail khusus halaman tetap berada di CSS Module fitur.
+- Grafik mengikuti ukuran kontainernya dengan `ResizeObserver`, tinggi 260 px
+  di ponsel dan 300 px di layar lain. Perhitungan titik/sumbu berada di
+  `analytics/lib/chart-layout.ts`. Satu pembacaan ditampilkan sebagai titik
+  tanpa area tren; label waktu menyesuaikan ruang yang tersedia.
 - `features/<fitur>/<fitur>.module.css`: styling khusus fitur yang diimpor
   melalui `styles`. `components/layout/workspace.module.css` menangani shell.
 - Selector module yang menyentuh primitive bersama menggunakan `:global(...)`

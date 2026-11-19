@@ -196,6 +196,45 @@ test.describe("authenticated application", () => {
           await page.evaluate(() => document.documentElement.scrollWidth),
         ).toBeLessThanOrEqual(width);
       });
+  test("profile actions keep space and Escape restores keyboard focus", async ({
+    page,
+  }) => {
+    await page.goto("/dashboard");
+    const trigger = page.getByRole("button", {
+      name: "Buka profil",
+      exact: true,
+    });
+    await trigger.click();
+    const dialog = page.getByRole("dialog", { name: "Profil akun" });
+    const manage = await dialog
+      .getByRole("link", { name: "Pengguna & penugasan", exact: true })
+      .boundingBox();
+    const logout = await dialog
+      .getByRole("button", { name: "Keluar dari akun", exact: true })
+      .boundingBox();
+    expect(logout!.y - manage!.y - manage!.height).toBeGreaterThanOrEqual(8);
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+  });
+  test("worker checkboxes remain beside their labels on mobile and desktop", async ({
+    page,
+  }) => {
+    await page.goto("/pengguna");
+    const group = page.getByRole("group", {
+      name: "Pekerja yang dapat mengakses zona",
+    });
+    const option = group.locator("label").first();
+    await expect(option).toBeVisible();
+    for (const width of [320, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      const checkbox = await option.getByRole("checkbox").boundingBox();
+      const text = await option.locator("strong").boundingBox();
+      expect(text!.x - checkbox!.x - checkbox!.width).toBeGreaterThanOrEqual(8);
+      expect(text!.x - checkbox!.x - checkbox!.width).toBeLessThanOrEqual(24);
+      expect((await option.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    }
+  });
   test("farm and zone CRUD survives reload and rules persist", async ({
     page,
   }) => {
@@ -614,6 +653,13 @@ test.describe("authenticated application", () => {
       await expect(
         page.getByRole("img", { name: /Grafik pembacaan/ }),
       ).toBeVisible();
+      expect(
+        (await page
+          .getByRole("img", { name: /Grafik pembacaan/ })
+          .boundingBox())!.height,
+      ).toBeLessThanOrEqual(320);
+      await expect(page.getByTestId("chart-point")).toHaveCount(1);
+      await expect(page.getByTestId("chart-area")).toHaveCount(0);
       const downloadPromise = page.waitForEvent("download");
       await page
         .getByRole("button", { name: "Unduh CSV", exact: true })

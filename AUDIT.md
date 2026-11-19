@@ -8,6 +8,19 @@ Verifikasi pembaruan: format, lint, TypeScript, build produksi, 32 unit test dan
 
 ## Temuan yang diperbaiki
 
+Perbaikan tampilan lanjutan berdasarkan screenshot: jarak antarpanel dan grup
+form kini memakai token bersama; tombol profil diberi jeda; daftar pengguna,
+pilihan pekerja dan pagination memakai tata letak khusus. Halaman pengguna
+memakai dua kolom mulai 1280 px dan satu kolom di bawahnya. Panel samping
+notifikasi terpisah, filter aktif terlihat, dan waktu ditampilkan dalam WIB.
+Grafik dibatasi setinggi 260/300 px dengan sumbu mengikuti lebar kontainer;
+satu pembacaan tidak lagi menghasilkan area tren menurun. Verifikasi lanjutan:
+35 unit test, 65 tes browser pada build produksi, serta pemeriksaan screenshot
+dan jarak elemen di dev server lulus. Suite mencakup 49 kombinasi halaman/lebar
+320–2560 px, pemulihan fokus dialog, kedekatan checkbox/label, dan grafik satu
+titik. Ini merupakan pemeriksaan responsif Chromium, bukan sertifikasi
+aksesibilitas penuh.
+
 | Temuan                                                      | Dampak sebelumnya                                                      | Perbaikan dan bukti                                                                                                                                                                                                                        |
 | ----------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Sesi lama tetap berlaku setelah reset kata sandi            | Pemegang JWT lama masih bisa mengakses API                             | `sessionVersion` disimpan dalam JWT dan diperiksa terhadap profil aktif. Reset menaikkan versi secara atomik. Tes sesi lama ditolak dan login dengan sandi baru berhasil.                                                                  |
