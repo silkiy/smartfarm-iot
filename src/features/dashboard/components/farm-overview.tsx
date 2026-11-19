@@ -1,6 +1,6 @@
-import { Badge } from "@/components/ui/badge";
+import { WeatherCard } from "./weather-card";
 import { Icon } from "@/components/ui/icon";
-import type { Farm } from "@/features/demo/types";
+import type { Farm } from "@/features/workspace/types";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "../dashboard.module.css";
@@ -45,37 +45,11 @@ export function FarmOverview({
           </Link>
         </div>
       </section>
-      <section className={styles["weather-panel"]}>
-        <div className="panel-title">
-          <h2>Cuaca sekitar lahan</h2>
-          <Badge tone="neutral">Contoh</Badge>
-        </div>
-        <div className={styles["weather-main"]}>
-          <div>
-            <strong>
-              28<span>°C</span>
-            </strong>
-            <p>Cerah berawan</p>
-          </div>
-          <div className={styles["weather-art"]}>
-            <Icon name="sun" size={65} />
-            <Icon name="cloud" size={62} />
-          </div>
-        </div>
-        <div className={styles["weather-details"]}>
-          <span>
-            <Icon name="drop" size={17} />
-            Kelembapan <strong>76%</strong>
-          </span>
-          <span>
-            <Icon name="wind" size={17} />
-            Angin <strong>8 km/j</strong>
-          </span>
-        </div>
-        <p className={styles["weather-note"]}>
-          Ilustrasi cuaca untuk {farm.location}
-        </p>
-      </section>
+      <WeatherCard
+        key={`${farm.id}:${farm.latitude}:${farm.longitude}`}
+        farmId={farm.id}
+        hasCoordinates={farm.latitude != null && farm.longitude != null}
+      />
     </div>
   );
 }

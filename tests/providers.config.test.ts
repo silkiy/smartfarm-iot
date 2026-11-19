@@ -6,7 +6,7 @@ import {
 } from "../src/server/integrations/config";
 
 describe("provider configuration", () => {
-  it("keeps providers disabled when credentials are absent", () => {
+  it("keeps WhatsApp disabled; public Open-Meteo needs no credentials", () => {
     assert.deepEqual(getWhatsAppConfiguration({}), {
       status: "NOT_CONFIGURED",
       missing: [
@@ -16,9 +16,25 @@ describe("provider configuration", () => {
       ],
     });
     assert.deepEqual(getWeatherConfiguration({}), {
-      status: "NOT_CONFIGURED",
-      missing: ["WEATHER_API_URL", "WEATHER_LOCATION"],
+      status: "CONFIGURED",
+      missing: [],
     });
+  });
+
+  it("explicit false disables providers even if credentials are present", () => {
+    assert.equal(
+      getWeatherConfiguration({ WEATHER_ENABLED: "false" }).status,
+      "NOT_CONFIGURED",
+    );
+    assert.equal(
+      getWhatsAppConfiguration({
+        WHATSAPP_ENABLED: "false",
+        WHATSAPP_ACCESS_TOKEN: "token",
+        WHATSAPP_PHONE_NUMBER_ID: "phone",
+        WHATSAPP_TEST_RECIPIENT: "recipient",
+      }).status,
+      "NOT_CONFIGURED",
+    );
   });
 
   it("reports incomplete enabled configuration", () => {

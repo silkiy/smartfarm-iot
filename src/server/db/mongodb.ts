@@ -12,8 +12,13 @@ export function getMongoClientPromise(): Promise<MongoClient> {
   }
 
   if (!globalThis.mongodbClientPromise) {
-    const client = new MongoClient(uri);
-    globalThis.mongodbClientPromise = client.connect();
+    const client = new MongoClient(uri, { serverSelectionTimeoutMS: 10_000 });
+    globalThis.mongodbClientPromise = client
+      .connect()
+      .catch((error: unknown) => {
+        globalThis.mongodbClientPromise = undefined;
+        throw error;
+      });
   }
 
   return globalThis.mongodbClientPromise;

@@ -10,6 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "bootstrap:admin": "tsx scripts/create-admin.ts",
+    "seed:dummy": "tsx scripts/seed-dummy.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test:e2e": "playwright test",

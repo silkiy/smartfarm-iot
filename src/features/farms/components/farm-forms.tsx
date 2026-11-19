@@ -2,8 +2,8 @@
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
-import { useDemo } from "@/features/demo/demo-provider";
-import type { Farm, Zone } from "@/features/demo/types";
+import { useWorkspace } from "@/features/workspace/workspace-provider";
+import type { Farm, Zone } from "@/features/workspace/types";
 import { type FormEvent } from "react";
 
 export function FarmForm({
@@ -13,37 +13,31 @@ export function FarmForm({
   farm?: Farm;
   onClose: () => void;
 }) {
-  const { setFarms, setFarmId, notify } = useDemo();
-  function submit(event: FormEvent<HTMLFormElement>) {
+  const { saveFarm, busy } = useWorkspace();
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const id = farm?.id ?? crypto.randomUUID();
-    const next: Farm = {
-      id,
+    const next = {
       name: String(form.get("name")).trim(),
       location: String(form.get("location")).trim(),
-      area: Number(form.get("area")).toLocaleString("id-ID"),
-      phase: String(form.get("phase")),
+      areaM2: Number(form.get("area")),
+      phase: String(form.get("phase")) as
+        "Vegetatif" | "Generatif" | "Pematangan",
+      latitude: String(form.get("latitude")).trim()
+        ? Number(form.get("latitude"))
+        : null,
+      longitude: String(form.get("longitude")).trim()
+        ? Number(form.get("longitude"))
+        : null,
     };
     if (!next.name || !next.location) return;
-    setFarms((previous) =>
-      farm
-        ? previous.map((item) => (item.id === id ? next : item))
-        : [...previous, next],
-    );
-    if (!farm) setFarmId(id);
-    notify(
-      farm
-        ? "Perubahan lahan disimpan dalam sesi demo."
-        : "Lahan contoh ditambahkan. Lanjutkan dengan menambah zona.",
-    );
-    onClose();
+    if (await saveFarm(next, farm?.id)) onClose();
   }
   return (
     <Dialog title={farm ? "Ubah lahan" : "Tambah lahan"} onClose={onClose}>
       <p>
-        Data tersimpan selama sesi demo. Memuat ulang halaman akan mengembalikan
-        contoh awal.
+        Simpan informasi lahan Anda. Koordinat opsional digunakan untuk
+        informasi cuaca.
       </p>
       <form onSubmit={submit}>
         <Field label="Nama lahan">
@@ -88,6 +82,30 @@ export function FarmForm({
             </select>
           </Field>
         </div>
+        <div className="form-grid">
+          <Field label="Lintang (opsional)">
+            <input
+              name="latitude"
+              type="number"
+              step="any"
+              min="-90"
+              max="90"
+              defaultValue={farm?.latitude ?? ""}
+              placeholder="-7.1"
+            />
+          </Field>
+          <Field label="Bujur (opsional)">
+            <input
+              name="longitude"
+              type="number"
+              step="any"
+              min="-180"
+              max="180"
+              defaultValue={farm?.longitude ?? ""}
+              placeholder="112.4"
+            />
+          </Field>
+        </div>
         <div className="dialog-actions">
           <button
             className="button button-secondary"
@@ -96,9 +114,13 @@ export function FarmForm({
           >
             Batal
           </button>
-          <button className="button button-primary" type="submit">
+          <button
+            className="button button-primary"
+            type="submit"
+            disabled={busy}
+          >
             <Icon name="check" size={16} />
-            Simpan lahan
+            {busy ? "Menyimpan…" : "Simpan lahan"}
           </button>
         </div>
       </form>
@@ -114,36 +136,13 @@ export function ZoneForm({
   zone?: Zone;
   onClose: () => void;
 }) {
-  const { setZones, notify } = useDemo();
-  function submit(event: FormEvent<HTMLFormElement>) {
+  const { saveZone, busy } = useWorkspace();
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const name = String(form.get("name")).trim();
     if (!name) return;
-    setZones((previous) =>
-      zone
-        ? previous.map((item) =>
-            item.id === zone.id ? { ...item, name } : item,
-          )
-        : [
-            ...previous,
-            {
-              id: crypto.randomUUID(),
-              farmId,
-              name,
-              moisture: 0,
-              water: 0,
-              online: false,
-              hasReading: false,
-            },
-          ],
-    );
-    notify(
-      zone
-        ? "Nama zona diperbarui dalam sesi demo."
-        : "Zona ditambahkan. Perangkat belum mengirim pembacaan sensor.",
-    );
-    onClose();
+    if (await saveZone(farmId, name, zone?.id)) onClose();
   }
   return (
     <Dialog title={zone ? "Ubah zona" : "Tambah zona"} onClose={onClose}>
@@ -176,7 +175,11 @@ export function ZoneForm({
           >
             Batal
           </button>
-          <button className="button button-primary" type="submit">
+          <button
+            className="button button-primary"
+            type="submit"
+            disabled={busy}
+          >
             Simpan zona
           </button>
         </div>

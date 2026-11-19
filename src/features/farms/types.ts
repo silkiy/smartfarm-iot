@@ -1,4 +1,4 @@
-import type { Farm, Zone } from "@/features/demo/types";
+import type { Farm, Zone } from "@/features/workspace/types";
 export type FarmEditor =
   | {
       type: "farm";

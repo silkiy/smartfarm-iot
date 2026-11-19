@@ -27,6 +27,9 @@ export interface BaseDocument {
   _id?: ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  isDemo?: boolean;
+  seedBatch?: string;
+  seedKey?: string;
 }
 
 export interface ProfileDocument extends BaseDocument {
@@ -36,12 +39,19 @@ export interface ProfileDocument extends BaseDocument {
   role: UserRole;
   isActive: boolean;
   passwordHash: string;
+  sessionVersion?: number;
+  preferences?: { web: boolean; whatsapp: boolean };
 }
 
 export interface FarmDocument extends BaseDocument {
   name: string;
   ownerUserId: string;
   location?: string;
+  areaM2?: number;
+  phase?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  archivedAt?: Date;
 }
 
 export interface ZoneDocument extends BaseDocument {
@@ -51,6 +61,7 @@ export interface ZoneDocument extends BaseDocument {
   isActive: boolean;
   assignedUserIds: string[];
   controlUserIds: string[];
+  archivedAt?: Date;
 }
 
 export interface DeviceDocument extends BaseDocument {
@@ -127,6 +138,9 @@ export interface AlertDocument extends BaseDocument {
   message: string;
   isRead: boolean;
   occurredAt: Date;
+  recipientUserId?: string;
+  title?: string;
+  readByUserIds?: string[];
 }
 
 export interface NotificationLogDocument extends BaseDocument {

@@ -10,9 +10,9 @@ cepat tanpa menambah layer yang belum dibutuhkan.
 ```text
 src/
   app/                         Route, layout, metadata, dan endpoint API
-    (preview)/                 Batas state demo, tidak menjadi bagian URL
+    (preview)/                 Group route, tidak menjadi bagian URL
       (workspace)/             Layout/sidebar untuk lima halaman utama
-      login/                   Formulir masuk pratinjau
+      login/                   Login akun nyata
     api/                       Endpoint server yang sudah ada
     globals.css                Reset dan aturan dasar dokumen
   assets/fonts/                Font lokal beserta lisensi
@@ -29,7 +29,8 @@ src/
       types.ts                 Tipe data grafik
     farms/components/          Daftar, kartu, dialog, formulir, pemilih lahan
     notifications/components/  Notifikasi dan preferensi contoh
-    demo/                      Fixtures, tipe demo, dan provider sesi pratinjau
+    workspace/                 Kontrak DTO dan provider data akun dari API
+    users/components/          Pengguna, kepemilikan dan penugasan
   domain/                      Model dan validasi domain, tanpa UI
   lib/                         Helper umum kecil, misalnya cn dan unduhan teks
   server/
@@ -56,9 +57,16 @@ public/images/                 Foto lokal yang digunakan frontend
   halaman, metadata, dan layout; logika layar berada di folder fitur.
 - Tambahkan `"use client"` pada komponen yang membutuhkan state, event handler,
   effect, atau API browser. Komponen UI statis tidak membutuhkan directive itu.
-- Provider demo berada pada `(preview)/layout.tsx`, sehingga login dan workspace
-  berbagi state ketika berpindah melalui `Link`. Endpoint API dan halaman 404
-  tidak perlu dibungkus state demo.
+- Login berdiri sendiri. Layout workspace memeriksa sesi Auth.js di balik Suspense.
+  WorkspaceProvider memuat snapshot dari API, menunggu hasil mutation sebelum
+  memperbarui state, dan mengarahkan sesi yang tidak valid kembali ke login.
+  Tidak ada selector peran atau penyimpanan data pribadi di localStorage.
+- Keenam halaman privat mendeklarasikan `instant = false` karena menunggu data
+  akun pada provider. Deklarasi layout tidak menggantikan validasi implicit tiap
+  page pada versi Next.js ini. Cache Components dan Partial Prefetching tetap aktif;
+  halaman login tetap memakai validasi bawaan.
+- Boundary sesi memanggil `connection()` di dalam Suspense sebelum Auth.js agar
+  kriptografi autentikasi berjalan pada request pengguna, bukan saat prerender.
 - `src/auth.ts` ditandai `server-only`. ESLint melarang komponen UI dan fitur
   mengimpor `@/server/**` atau `@/auth`. Tipe/data domain yang benar-benar dapat
   dibagi tetap berada di `domain/`.
@@ -93,14 +101,13 @@ Nama file menggunakan kebab-case. Nama komponen menggunakan PascalCase, hook
 diawali `use`, dan helper diberi nama sesuai hasilnya. Pecah komponen ketika
 memiliki beberapa tanggung jawab, bukan semata untuk mengejar jumlah baris.
 
-## Menghubungkan backend nanti
+## Boundary backend
 
-Pertahankan komponen presentasi yang sudah dipisahkan. Ganti sumber data contoh
-dengan pemanggilan layanan melalui boundary server/API yang sesuai. Jangan
-mengubah role selector demo menjadi pemeriksaan keamanan. Autentikasi, role,
-kepemilikan lahan, dan penugasan zona tetap diverifikasi pada setiap resource
-di server. Data cuaca, notifikasi, dan status perintah perlu memiliki keadaan
-loading, gagal, kosong, stale, dan konfirmasi perangkat yang nyata.
+Kode database, kebijakan akses dan integrasi berada di `src/server/`. Route Handler
+memvalidasi input melalui Zod dan memeriksa profil aktif/otorisasi per resource.
+`src/domain/workspace.ts` dan `src/domain/report.ts` mendefinisikan kontrak input;
+DTO browser berada di `src/features/workspace/types.ts`. Detail endpoint, setup
+admin, batas hardware dan pengujian dijelaskan dalam [BACKEND.md](BACKEND.md).
 
 ## Sumber keputusan
 

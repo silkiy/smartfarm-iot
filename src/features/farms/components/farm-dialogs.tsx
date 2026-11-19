@@ -1,8 +1,8 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Dialog } from "@/components/ui/dialog";
-import { useDemo } from "@/features/demo/demo-provider";
-import type { Farm, Zone } from "@/features/demo/types";
+import { useWorkspace } from "@/features/workspace/workspace-provider";
+import type { Farm, Zone } from "@/features/workspace/types";
 import type { FarmEditor } from "../types";
 import { FarmForm, ZoneForm } from "./farm-forms";
 export function FarmDialogs({
@@ -12,34 +12,12 @@ export function FarmDialogs({
   editor: FarmEditor;
   onClose: () => void;
 }) {
-  const {
-    farms,
-    setFarms,
-    zones,
-    setZones,
-    farmId,
-    setFarmId,
-    runningZone,
-    stopIrrigation,
-    notify,
-  } = useDemo();
-  function deleteFarm(farm: Farm) {
-    if (
-      zones.some((zone) => zone.farmId === farm.id && zone.id === runningZone)
-    )
-      stopIrrigation();
-    setFarms((previous) => previous.filter((item) => item.id !== farm.id));
-    setZones((previous) => previous.filter((zone) => zone.farmId !== farm.id));
-    if (farmId === farm.id)
-      setFarmId(farms.find((item) => item.id !== farm.id)?.id ?? "");
-    onClose();
-    notify("Lahan dan zona terkait dihapus dari sesi demo.");
+  const { removeFarm, removeZone, busy } = useWorkspace();
+  async function deleteFarm(farm: Farm) {
+    if (await removeFarm(farm.id)) onClose();
   }
-  function deleteZone(zone: Zone) {
-    if (runningZone === zone.id) stopIrrigation();
-    setZones((previous) => previous.filter((item) => item.id !== zone.id));
-    onClose();
-    notify("Zona dihapus dari sesi demo.");
+  async function deleteZone(zone: Zone) {
+    if (await removeZone(zone.id)) onClose();
   }
   return (
     <>
@@ -54,11 +32,10 @@ export function FarmDialogs({
         />
       )}
       {editor?.type === "delete-farm" && (
-        <Dialog title="Hapus lahan dari demo?" onClose={() => onClose()}>
+        <Dialog title="Hapus lahan?" onClose={() => onClose()}>
           <p>
             <strong>{editor.farm.name}</strong> beserta zona terkait akan
-            dihapus dari sesi demo ini. Data contoh awal dapat dipulihkan dengan
-            memuat ulang halaman.
+            diarsipkan. Riwayat tersimpan tetap dipertahankan.
           </p>
           <div className="dialog-actions">
             <button
@@ -69,6 +46,7 @@ export function FarmDialogs({
             </button>
             <button
               className="button button-danger"
+              disabled={busy}
               onClick={() => deleteFarm(editor.farm)}
             >
               Hapus lahan
@@ -77,10 +55,10 @@ export function FarmDialogs({
         </Dialog>
       )}
       {editor?.type === "delete-zone" && (
-        <Dialog title="Hapus zona dari demo?" onClose={() => onClose()}>
+        <Dialog title="Hapus zona?" onClose={() => onClose()}>
           <p>
-            <strong>{editor.zone.name}</strong> akan dihapus dari sesi ini.
-            Simulasi irigasi pada zona tersebut juga akan dihentikan.
+            <strong>{editor.zone.name}</strong> akan diarsipkan dan tidak muncul
+            pada daftar zona aktif.
           </p>
           <div className="dialog-actions">
             <button
@@ -91,6 +69,7 @@ export function FarmDialogs({
             </button>
             <button
               className="button button-danger"
+              disabled={busy}
               onClick={() => deleteZone(editor.zone)}
             >
               Hapus zona
@@ -105,13 +84,13 @@ export function FarmDialogs({
         >
           <Badge tone={editor.zone.online ? "green" : "neutral"}>
             {editor.zone.online
-              ? "Contoh perangkat aktif"
+              ? "Perangkat aktif"
               : "Terputus / belum terhubung"}
           </Badge>
           <div className="dialog-summary">
             <div>
               <span>Pengendali</span>
-              <strong>ESP32 (contoh)</strong>
+              <strong>Belum terdaftar</strong>
             </div>
             <div>
               <span>Sensor tanah</span>

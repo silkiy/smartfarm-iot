@@ -1,14 +1,14 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
-import { useDemo } from "@/features/demo/demo-provider";
-import type { Zone } from "@/features/demo/types";
+import { useWorkspace } from "@/features/workspace/workspace-provider";
+import type { Zone } from "@/features/workspace/types";
 import { cn } from "@/lib/cn";
 import Link from "next/link";
 import styles from "../dashboard.module.css";
 
 export function ZoneCard({ zone, index }: { zone: Zone; index: number }) {
-  const { setSelectedZoneId } = useDemo();
+  const { setSelectedZoneId } = useWorkspace();
   return (
     <section
       className={cn(
@@ -68,8 +68,8 @@ export function ZoneCard({ zone, index }: { zone: Zone; index: number }) {
           {zone.hasReading === false
             ? "Belum ada pembacaan"
             : zone.online
-              ? "Data contoh · 10.45 WIB"
-              : "Data lama · 10 menit lalu"}
+              ? "Data tersimpan"
+              : "Pembacaan tersimpan"}
         </span>
         <Link
           href="/irigasi"

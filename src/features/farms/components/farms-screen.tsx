@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { PageHeading } from "@/components/ui/page-heading";
-import { useDemo } from "@/features/demo/demo-provider";
+import { useWorkspace } from "@/features/workspace/workspace-provider";
 import styles from "@/features/farms/farms.module.css";
 import { cn } from "@/lib/cn";
 import { useState } from "react";
@@ -12,7 +12,7 @@ import { FarmDialogs } from "./farm-dialogs";
 
 import type { FarmEditor } from "../types";
 export function Farms() {
-  const { farms, zones, role } = useDemo();
+  const { farms, zones, role } = useWorkspace();
   const [editor, setEditor] = useState<FarmEditor>(null);
   const [search, setSearch] = useState("");
   const readonly = role === "Pekerja lapangan";
@@ -60,7 +60,7 @@ export function Farms() {
           <strong>
             {zones.filter((zone) => zone.online).length}/{zones.length}
           </strong>
-          <span>perangkat contoh aktif</span>
+          <span>perangkat terhubung</span>
         </div>
       </div>
       <div className="section-toolbar">

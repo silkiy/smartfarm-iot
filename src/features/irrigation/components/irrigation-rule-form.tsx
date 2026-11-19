@@ -1,25 +1,22 @@
 "use client";
 import { Field } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
-import { useDemo } from "@/features/demo/demo-provider";
-import { defaultRule } from "@/features/demo/fixtures";
-import type { IrrigationRule } from "@/features/demo/types";
+import { useWorkspace } from "@/features/workspace/workspace-provider";
+import { defaultRule } from "@/features/workspace/types";
+import type { IrrigationRule } from "@/features/workspace/types";
 import styles from "@/features/irrigation/irrigation.module.css";
 import { cn } from "@/lib/cn";
 import { useState, type FormEvent } from "react";
 
 export function RuleForm({ zoneId }: { zoneId: string }) {
-  const { rules, setRules, role, notify } = useDemo();
+  const { rules, saveRule, role, busy } = useWorkspace();
   const [draft, setDraft] = useState<IrrigationRule>(
     rules[zoneId] ?? defaultRule,
   );
   const readonly = role === "Pekerja lapangan";
-  function save(event: FormEvent) {
+  async function save(event: FormEvent) {
     event.preventDefault();
-    setRules((previous) => ({ ...previous, [zoneId]: draft }));
-    notify(
-      "Aturan contoh disimpan untuk zona ini. Otomatisasi perangkat belum dijalankan.",
-    );
+    await saveRule(zoneId, draft);
   }
   return (
     <form className={cn("panel", styles["rule-panel"])} onSubmit={save}>
@@ -43,11 +40,11 @@ export function RuleForm({ zoneId }: { zoneId: string }) {
       <div className={styles["rule-description"]}>
         <Icon name="info" size={17} />
         <p>
-          Pengaturan ini merupakan simulasi. Nilai ambang akan dikalibrasi pada
-          miniatur sawah.
+          Aturan disimpan sebagai rancangan. Eksekusi otomatis menunggu
+          perangkat dan kalibrasi.
         </p>
       </div>
-      <fieldset disabled={readonly} className={styles["form-fieldset"]}>
+      <fieldset disabled={readonly || busy} className={styles["form-fieldset"]}>
         <Field label="Fase pertumbuhan">
           <select
             value={draft.phase}
@@ -95,7 +92,7 @@ export function RuleForm({ zoneId }: { zoneId: string }) {
         </div>
         <Field
           label="Jadwal harian (WIB)"
-          hint="Jadwal contoh. Belum mengeksekusi irigasi otomatis."
+          hint="Jadwal tersimpan. Eksekusi menunggu perangkat."
         >
           <input
             type="time"
@@ -116,7 +113,7 @@ export function RuleForm({ zoneId }: { zoneId: string }) {
         </div>
         <button className="button button-primary" type="submit">
           <Icon name="check" size={17} />
-          Simpan aturan contoh
+          Simpan aturan
         </button>
       </fieldset>
     </form>
