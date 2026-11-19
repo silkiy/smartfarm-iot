@@ -118,7 +118,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {initials}
               </button>
               <div className={styles["profile-label"]}>
-                <span>{user.name}</span>
+                <span title={user.name}>{user.name}</span>
                 <span>{role}</span>
               </div>
             </div>

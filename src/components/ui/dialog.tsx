@@ -6,10 +6,12 @@ export function Dialog({
   title,
   children,
   onClose,
+  footer,
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
+  footer?: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -46,7 +48,8 @@ export function Dialog({
             <Icon name="close" />
           </button>
         </div>
-        {children}
+        <div className="dialog-body">{children}</div>
+        {footer && <div className="dialog-footer">{footer}</div>}
       </div>
     </dialog>
   );

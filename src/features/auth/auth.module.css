@@ -59,6 +59,9 @@
   );
 }
 .login-brand {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   position: absolute;
   top: 42px;
   left: 48px;
@@ -94,7 +97,7 @@
   align-items: center;
   gap: 9px;
   color: #d5e5d2;
-  font-size: 10px;
+  font-size: 12px;
   margin-top: 35px;
 }
 .login-photo-credit {
@@ -102,7 +105,7 @@
   left: 48px;
   bottom: 32px;
   color: #c3d6be;
-  font-size: 9px;
+  font-size: 12px;
 }
 .login-form-side {
   position: relative;
@@ -139,7 +142,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  font-size: 9px;
+  font-size: 12px;
   color: var(--muted);
 }
 .login-options > span {
@@ -148,7 +151,7 @@
   gap: 5px;
 }
 .login-options :global(.text-link) {
-  font-size: 10px;
+  font-size: 12px;
 }
 .login-form > :global(.button) {
   min-height: 48px;
@@ -159,7 +162,7 @@
   display: flex;
   align-items: center;
   gap: 13px;
-  font-size: 10px;
+  font-size: 12px;
   color: #5b685b;
   margin: 17px 0;
 }
@@ -171,7 +174,7 @@
   flex: 1;
 }
 .login-footnote {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.9;
   text-align: center;
   max-width: 300px;
@@ -183,11 +186,11 @@
   justify-content: space-between;
   gap: 20px;
   color: #5b685b;
-  font-size: 9px;
+  font-size: 12px;
   margin-top: 36px;
 }
 .login-footer > span {
-  font-size: 9px;
+  font-size: 12px;
 }
 .login-mobile-brand {
   display: none;
@@ -255,13 +258,13 @@
     margin-top: 25px;
   }
   .login-options :global(.text-link) {
-    min-height: 28px;
+    min-height: 44px;
   }
   .login-intro {
     font-size: 12px;
   }
   .login-footer {
-    font-size: 8px;
+    font-size: 12px;
   }
   .login-intro,
   .login-form :global(.field) > span {
@@ -269,6 +272,6 @@
   }
   .login-options,
   .login-options :global(.text-link) {
-    font-size: 11px;
+    font-size: 12px;
   }
 }
