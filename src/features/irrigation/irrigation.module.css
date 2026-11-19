@@ -1,233 +1,42 @@
-.irrigation-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-  gap: 24px;
-}
-.irrigation-control {
-  padding: 24px 28px;
-  text-align: center;
-}
-.irrigation-control > :global(.panel-title) h2 {
-  font-size: 14px;
-}
-.large-pump-icon {
-  margin: 28px auto 20px;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: #f0f4eb;
-  box-shadow: 0 0 0 12px #f7f9f4;
-  display: grid;
-  place-items: center;
-  color: #94a68a;
-}
-.irrigation-running .large-pump-icon {
-  color: var(--green);
-  background: #e2f3d7;
-  box-shadow: 0 0 0 12px #f2f8ed;
-}
-.irrigation-control > h2 {
-  font-size: 21px;
-  letter-spacing: -0.5px;
-}
-.irrigation-control > p {
-  font-size: 11px;
-  margin-top: 8px;
-}
-.control-status {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  padding: 21px 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  margin: 27px 0;
-}
-.control-status > div {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  align-items: center;
-}
-.control-status > div + div {
-  border-left: 1px solid var(--line);
-}
-.control-status > div > span {
-  font-size: 10px;
-  color: var(--muted);
-}
-.control-status strong {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-}
-.control-status .timer-number {
-  font-variant-numeric: tabular-nums;
-}
-.timer-number small {
-  font-size: 9px;
-  color: var(--muted);
-  font-weight: 400;
-}
-.duration-options {
-  text-align: left;
-  margin-bottom: 23px;
-}
-.duration-options > span {
-  font-size: 11px;
-  font-weight: 650;
-}
-.duration-options > div {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 11px;
-}
-.duration-options button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  min-height: 53px;
-  background: #fafbf8;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  font-size: 20px;
-  font-weight: 700;
-}
-.duration-options button > span {
-  font-size: 10px;
-  font-weight: 500;
-}
-.duration-options button:global(.selected) {
-  background: #ecf6e5;
-  border-color: #5d8a48;
-  color: var(--green);
-}
-.irrigation-control > :global(.button) {
-  min-height: 47px;
-}
-.irrigation-control > .control-helper {
-  font-size: 10px;
-  color: var(--amber);
-  margin-top: 12px;
-}
-.irrigation-aside {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.irrigation-aside > :global(.panel) {
-  padding: 22px;
-}
-.condition-stat {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  padding: 21px 0;
-  border-bottom: 1px solid var(--line);
-}
-.condition-stat:last-of-type {
-  margin-bottom: 16px;
-}
-.condition-stat > span {
-  font-size: 11px;
-  color: var(--muted);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.condition-stat > span > svg {
-  width: 17px;
-  color: #7d9271;
-}
-.condition-stat strong {
-  font-size: 25px;
-  letter-spacing: -1px;
-}
-.condition-stat small {
-  font-size: 11px;
-  color: var(--muted);
-  margin-left: 3px;
-  letter-spacing: 0;
-}
-.safety-panel {
-  border-radius: var(--radius);
-  padding: 24px;
-  background: #edf3e4;
-  border: 1px solid #e2e9d9;
-}
-.safety-panel :global(.icon-tile) {
-  background: #dfeccd;
-}
-.safety-panel h2 {
-  margin: 16px 0 12px;
-  font-size: 15px;
-}
-.safety-panel ul {
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-  margin-bottom: 18px;
-}
-.safety-panel li {
-  font-size: 11px;
-  color: #516046;
-  display: flex;
-  gap: 9px;
-}
-.safety-panel li:before {
-  content: "✓";
-  color: #5b843e;
-  font-size: 12px;
-}
-.safety-panel > p {
-  font-size: 10px;
-  line-height: 1.8;
-  padding-top: 15px;
-  border-top: 1px solid #dce5d0;
-}
 .rule-panel > :global(.panel-title) {
   align-items: center;
-  margin-bottom: 22px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 .rule-panel :global(.panel-title) h2 {
-  font-size: 15px;
+  font-size: 16px;
 }
 .rule-panel :global(.panel-title) p {
-  font-size: 11px;
-  margin-top: 5px;
+  font-size: 13px;
+  margin-top: 8px;
 }
 .rule-description {
   display: flex;
   align-items: flex-start;
-  gap: 9px;
+  gap: 12px;
   background: var(--pale);
-  border-radius: 9px;
-  padding: 13px;
+  border-radius: 10px;
+  padding: 16px;
   margin-bottom: 24px;
   color: var(--green);
 }
 .rule-description p {
-  font-size: 10px;
+  font-size: 13px;
 }
 .rule-description > svg {
-  margin-top: 2px;
+  margin-top: 3px;
 }
 .form-fieldset {
   border: 0;
   padding: 0;
   margin: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  min-width: 0;
+  gap: 24px;
 }
 .form-fieldset:disabled {
-  opacity: 0.65;
+  opacity: 0.7;
 }
 .form-fieldset > :global(.button) {
   align-self: flex-start;
@@ -235,209 +44,24 @@
 .rule-preview {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 15px;
+  gap: 12px;
+  padding: 16px;
   border: 1px dashed #cbdac0;
-  border-radius: 9px;
+  border-radius: 10px;
   color: var(--green);
 }
 .rule-preview p {
-  font-size: 11px;
-  line-height: 1.8;
+  font-size: 13px;
+  line-height: 1.75;
 }
 .rule-preview > svg {
-  margin-top: 2px;
+  margin-top: 3px;
 }
 .rule-preview strong {
   color: var(--green);
 }
-@media (max-width: 1199px) {
-  .irrigation-layout {
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    gap: 20px;
-  }
-  .irrigation-control {
-    padding: 22px;
-  }
-}
-@media (max-width: 899px) {
-  .irrigation-layout {
-    grid-template-columns: 1.4fr 1fr;
-  }
-}
-@media (max-width: 699px) {
-  .irrigation-layout {
-    grid-template-columns: 1fr;
-  }
-  .irrigation-aside {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-    gap: 16px;
-  }
-  .irrigation-aside > :global(.button) {
-    grid-column: 1/-1;
-  }
-  .safety-panel {
-    padding: 20px;
-  }
-  .safety-panel li {
-    font-size: 10px;
-    line-height: 1.8;
-  }
-  .irrigation-aside > :global(.panel) {
-    padding: 20px;
-  }
-  .condition-stat {
-    gap: 8px;
-    padding-block: 17px;
-  }
-  .condition-stat > span {
-    font-size: 10px;
-    gap: 5px;
-  }
-  .condition-stat > span > svg {
-    display: none;
-  }
-  .condition-stat strong {
-    font-size: 21px;
-  }
-  .condition-stat small {
-    font-size: 9px;
-  }
-}
 @media (max-width: 599px) {
-  .irrigation-control {
-    padding: 19px;
-  }
-  .irrigation-control > :global(.panel-title) h2 {
-    font-size: 13px;
-  }
-  .irrigation-control > :global(.panel-title) :global(.badge) {
-    font-size: 8px;
-  }
-  .large-pump-icon {
-    width: 84px;
-    height: 84px;
-    margin-top: 30px;
-  }
-  .irrigation-control > h2 {
-    font-size: 20px;
-  }
-  .irrigation-control > p {
-    font-size: 10px;
-  }
-  .control-status {
-    margin: 24px 0;
-    padding: 18px 0;
-  }
-  .control-status > div > span {
-    font-size: 9px;
-  }
-  .control-status strong {
-    font-size: 12px;
-  }
-  .duration-options button {
-    min-height: 51px;
-  }
-  .duration-options > span {
-    font-size: 10px;
-  }
-  .irrigation-aside {
-    gap: 12px;
-  }
-  .irrigation-aside > :global(.panel),
-  .safety-panel {
-    padding: 17px;
-  }
-  .irrigation-aside :global(.panel-title) h2,
-  .safety-panel h2 {
-    font-size: 12px;
-  }
-  .condition-stat > span {
-    font-size: 9px;
-  }
-  .condition-stat strong {
-    font-size: 20px;
-  }
-  .irrigation-aside :global(.muted) {
-    font-size: 8px;
-  }
-  .safety-panel :global(.icon-tile) {
-    width: 34px;
-    height: 34px;
-  }
-  .safety-panel li {
-    font-size: 9px;
-    gap: 6px;
-  }
-  .safety-panel > p {
-    font-size: 8px;
-  }
-  .irrigation-aside > :global(.button) {
-    font-size: 11px;
-  }
-  .rule-panel > :global(.panel-title) {
-    align-items: flex-start;
-  }
-  .rule-panel :global(.panel-title) h2 {
-    font-size: 14px;
-  }
-  .rule-panel :global(.panel-title) p {
-    font-size: 10px;
-  }
-  .form-fieldset {
-    gap: 19px;
-  }
-  .rule-preview p {
-    font-size: 10px;
-  }
   .form-fieldset > :global(.button) {
     width: 100%;
-  }
-}
-@media (max-width: 359px) {
-  .irrigation-aside {
-    grid-template-columns: 1fr;
-  }
-  .condition-stat > span {
-    font-size: 11px;
-  }
-  .condition-stat > span > svg {
-    display: block;
-  }
-  .condition-stat strong {
-    font-size: 25px;
-  }
-  .safety-panel li {
-    font-size: 11px;
-  }
-  .safety-panel > p {
-    font-size: 10px;
-  }
-}
-@media (max-width: 599px) {
-  .irrigation-control > p,
-  .rule-description p,
-  .rule-preview p {
-    font-size: 12px;
-  }
-  .safety-panel li {
-    font-size: 11px;
-  }
-  .safety-panel > p {
-    font-size: 10px;
-  }
-  .irrigation-aside {
-    grid-template-columns: 1fr;
-  }
-  .condition-stat > span {
-    font-size: 12px;
-  }
-  .condition-stat strong {
-    font-size: 26px;
-  }
-  .irrigation-aside :global(.muted) {
-    font-size: 10px;
   }
 }

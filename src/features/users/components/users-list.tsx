@@ -1,4 +1,5 @@
 "use client";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Field } from "@/components/ui/field";
 import { minimumPasswordLength } from "@/domain/password-policy";
@@ -7,6 +8,8 @@ import styles from "../users.module.css";
 
 export function UsersList({
   people,
+  state,
+  onRetry,
   page,
   total,
   busy,
@@ -16,6 +19,8 @@ export function UsersList({
   onReset,
 }: {
   people: Person[];
+  state: "loading" | "ready" | "failed";
+  onRetry: () => void;
   page: number;
   total: number;
   busy: boolean;
@@ -29,34 +34,56 @@ export function UsersList({
     <section className="panel stack" aria-labelledby="users-title">
       <div className="panel-title">
         <h2 id="users-title">Daftar pengguna</h2>
-        <Badge tone="neutral">{total} akun</Badge>
+        <Badge tone="neutral">
+          {state === "loading"
+            ? "Memuat…"
+            : state === "failed"
+              ? "Belum dimuat"
+              : `${total} akun`}
+        </Badge>
       </div>
-      <ul className={styles["user-list"]}>
-        {people.map((person) => (
-          <li key={person.userId} className={styles["user-row"]}>
-            <div className={styles["user-info"]}>
-              <strong>{person.displayName}</strong>
-              <span className={styles["user-email"]}>{person.email}</span>
-              <div className={styles["user-meta"]}>
-                <span>{personRoleLabels[person.role]}</span>
-                <Badge tone={person.isActive ? "green" : "neutral"}>
-                  {person.isActive ? "Aktif" : "Nonaktif"}
-                </Badge>
+      {state === "loading" ? (
+        <p role="status">Memuat daftar pengguna…</p>
+      ) : state === "failed" ? (
+        <div className="form-stack">
+          <p>Daftar pengguna belum dapat dimuat.</p>
+          <button className="button button-secondary" onClick={onRetry}>
+            Coba lagi
+          </button>
+        </div>
+      ) : !people.length ? (
+        <EmptyState
+          title="Belum ada pengguna"
+          description="Akun yang dapat Anda kelola akan muncul di sini."
+        />
+      ) : (
+        <ul className={styles["user-list"]}>
+          {people.map((person) => (
+            <li key={person.userId} className={styles["user-row"]}>
+              <div className={styles["user-info"]}>
+                <strong>{person.displayName}</strong>
+                <span className={styles["user-email"]}>{person.email}</span>
+                <div className={styles["user-meta"]}>
+                  <span>{personRoleLabels[person.role]}</span>
+                  <Badge tone={person.isActive ? "green" : "neutral"}>
+                    {person.isActive ? "Aktif" : "Nonaktif"}
+                  </Badge>
+                </div>
               </div>
-            </div>
-            {isAdmin && person.role !== "ADMIN" && (
-              <button
-                className="button button-secondary"
-                disabled={busy}
-                aria-label={`${person.isActive ? "Nonaktifkan" : "Aktifkan"} ${person.displayName}`}
-                onClick={() => onToggle(person)}
-              >
-                {person.isActive ? "Nonaktifkan" : "Aktifkan"}
-              </button>
-            )}
-          </li>
-        ))}
-      </ul>
+              {isAdmin && person.role !== "ADMIN" && (
+                <button
+                  className="button button-secondary"
+                  disabled={busy}
+                  aria-label={`${person.isActive ? "Nonaktifkan" : "Aktifkan"} ${person.displayName}`}
+                  onClick={() => onToggle(person)}
+                >
+                  {person.isActive ? "Nonaktifkan" : "Aktifkan"}
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
       {isAdmin && (
         <details className={styles["reset-panel"]}>
           <summary>Atur ulang kata sandi pengguna</summary>
@@ -113,14 +140,14 @@ export function UsersList({
         <div className="form-actions">
           <button
             className="button button-secondary"
-            disabled={page === 1 || busy}
+            disabled={page === 1 || busy || state !== "ready"}
             onClick={() => onPageChange(page - 1)}
           >
             Sebelumnya
           </button>
           <button
             className="button button-secondary"
-            disabled={page * 100 >= total || busy}
+            disabled={page * 100 >= total || busy || state !== "ready"}
             onClick={() => onPageChange(page + 1)}
           >
             Berikutnya

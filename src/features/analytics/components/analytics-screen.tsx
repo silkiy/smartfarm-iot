@@ -143,11 +143,13 @@ export function Analytics() {
       </section>
       <section className="panel stack" aria-label="Laporan pembacaan sensor">
         {invalid ? (
-          <p role="alert">
+          <p className="form-error" role="alert">
             Pilih rentang tanggal yang valid, maksimal 31 hari.
           </p>
         ) : error ? (
-          <p role="alert">{error}</p>
+          <p className="form-error" role="alert">
+            {error}
+          </p>
         ) : !farm ? (
           <EmptyState
             title="Belum ada lahan"

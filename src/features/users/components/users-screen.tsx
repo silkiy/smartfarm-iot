@@ -13,6 +13,10 @@ export function UsersScreen() {
   const [people, setPeople] = useState<Person[]>([]),
     [page, setPage] = useState(1),
     [total, setTotal] = useState(0);
+  const [listState, setListState] = useState<"loading" | "ready" | "failed">(
+    "loading",
+  );
+  const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [zoneId, setZoneId] = useState("");
@@ -28,13 +32,17 @@ export function UsersScreen() {
       .then((data) => {
         setPeople(data.items);
         setTotal(data.total);
+        setListState("ready");
         setError("");
       })
       .catch((e: Error) => {
-        if (e.name !== "AbortError") setError(e.message);
+        if (e.name !== "AbortError") {
+          setError(e.message);
+          setListState("failed");
+        }
       });
     return () => controller.abort();
-  }, [user.role, page]);
+  }, [user.role, page, attempt]);
   if (user.role === "FIELD_WORKER")
     return (
       <section className="panel stack">
@@ -141,8 +149,16 @@ export function UsersScreen() {
             page={page}
             total={total}
             busy={busy}
+            state={listState}
+            onRetry={() => {
+              setListState("loading");
+              setAttempt((n) => n + 1);
+            }}
             isAdmin={user.role === "ADMIN"}
-            onPageChange={setPage}
+            onPageChange={(nextPage) => {
+              setListState("loading");
+              setPage(nextPage);
+            }}
             onToggle={(person) =>
               void save(`/api/users/${person.userId}`, "PATCH", {
                 isActive: !person.isActive,
