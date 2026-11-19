@@ -1,63 +1,67 @@
 .farm-summary-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-  margin-bottom: 28px;
+  gap: 24px;
 }
 .farm-summary-row > div {
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
 }
 .farm-summary-row strong {
-  font-size: 22px;
-  letter-spacing: -0.7px;
+  font-size: 24px;
 }
 .farm-summary-row > div > span:last-child {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
 }
 .search-field {
   display: flex;
   align-items: center;
-  gap: 9px;
-  background: #fff;
+  gap: 8px;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 9px;
-  padding-left: 13px;
-  width: 340px;
-  max-width: 100%;
-  color: #89977d;
+  padding-left: 12px;
+  width: min(100%, 380px);
+  color: var(--muted);
 }
 .search-field input {
   border: 0;
   background: transparent;
   min-width: 0;
   width: 100%;
-  font-size: 11px;
+  font-size: 14px;
   padding: 12px;
-  min-height: 44px;
-  outline-offset: 0;
+  min-height: 46px;
   border-radius: 8px;
 }
 .farm-cards {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
   gap: 24px;
   align-items: start;
 }
 .farm-card {
-  background: #fff;
+  background: var(--surface);
   border-radius: var(--radius);
   border: 1px solid var(--line);
   overflow: hidden;
   min-width: 0;
 }
+.farm-card[data-selected="true"] {
+  border-color: #acc8a5;
+}
 .farm-card-photo {
-  height: 200px;
+  min-height: 240px;
   position: relative;
   overflow: hidden;
   color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 .farm-card-photo > img {
   object-fit: cover;
@@ -71,336 +75,150 @@
   position: relative;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 17px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 16px 0;
 }
 .photo-actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 .photo-actions :global(.icon-button) {
-  width: 33px;
-  height: 33px;
-  border: 0;
-  border-radius: 8px;
-  background: #ffffffe8;
-  color: #23492a;
+  width: 44px;
+  height: 44px;
+  background: #fffffff0;
+  color: var(--green);
 }
 .farm-photo-title {
-  position: absolute;
-  bottom: 20px;
-  left: 22px;
-  right: 22px;
-}
-.farm-photo-title > p {
-  color: #dde9d7;
-  font-size: 9px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 4px;
-}
-.farm-photo-title h2 {
-  font-size: 22px;
-  line-height: 1.35;
-  letter-spacing: -0.7px;
+  position: relative;
+  margin-top: auto;
+  padding: 0 20px 20px;
   overflow-wrap: anywhere;
 }
-.farm-photo-title > span {
-  font-size: 10px;
+.farm-photo-title > p {
   color: #e3eddf;
+  font-size: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.farm-photo-title > p > svg {
+  margin-top: 3px;
+}
+.farm-photo-title h2 {
+  font-size: 24px;
+  line-height: 1.35;
+}
+.farm-photo-title > span {
   display: block;
   margin-top: 8px;
+  font-size: 12px;
+  color: #e3eddf;
 }
 .farm-card-body {
   padding: 20px;
 }
-.farm-card-body > :global(.panel-title) > h3 {
-  font-size: 12px;
+.farm-card-body > :global(.panel-title) {
+  flex-wrap: wrap;
 }
-.farm-card-body > :global(.panel-title) > :global(.text-link) {
-  font-size: 10px;
-  min-height: 30px;
+.farm-card-body > :global(.panel-title) > h3 {
+  font-size: 14px;
 }
 .farm-zone-list {
-  margin-top: 11px;
+  margin-top: 8px;
 }
 .farm-zone-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 17px 0;
-  border-bottom: 1px solid var(--line);
   flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
 }
 .farm-zone-row > :global(.zone-number) {
   align-self: flex-start;
-  margin-top: 3px;
+  margin-top: 4px;
 }
 .farm-zone-row > div:nth-child(2) {
-  flex: 1;
-  min-width: 100px;
+  flex: 1 1 150px;
+  min-width: 0;
 }
 .farm-zone-row h3 {
-  font-size: 11px;
+  font-size: 14px;
   overflow-wrap: anywhere;
 }
 .farm-zone-row p {
-  font-size: 9px;
-  margin-top: 5px;
+  font-size: 12px;
+  margin-top: 8px;
 }
 .device-state {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 8px;
-  margin-top: 7px;
-}
-.online-state,
-.offline-state {
-  color: #5b685b;
+  gap: 8px;
+  font-size: 12px;
+  margin-top: 8px;
+  color: var(--muted);
 }
 .zone-row-actions {
   display: flex;
-  gap: 4px;
+  gap: 8px;
+  margin-left: auto;
 }
 .zone-row-actions > :global(.icon-button) {
-  width: 30px;
-  height: 34px;
-  border-color: transparent;
-  border-radius: 6px;
-}
-.zone-row-actions > :global(.icon-button):hover {
+  width: 44px;
+  height: 44px;
   border-color: var(--line);
 }
 .farm-card-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  padding-top: 17px;
+  gap: 12px;
+  padding-top: 16px;
 }
 .farm-card-footer > :global(.muted) {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 9px;
-}
-.farm-card-footer > :global(.text-link) {
-  font-size: 10px;
+  gap: 8px;
 }
 .zone-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+  display: grid;
+  justify-items: center;
   text-align: center;
-  gap: 10px;
-  padding: 30px 14px;
-  color: #5b685b;
+  gap: 12px;
+  padding: 24px 16px;
+  color: var(--muted);
 }
 .zone-empty p {
-  font-size: 10px;
-  max-width: 220px;
+  font-size: 13px;
+  max-width: 260px;
 }
 .farm-bottom-note {
-  margin-top: 24px;
   padding: 0;
 }
-@media (max-width: 1199px) {
-  .farm-cards {
-    gap: 20px;
-  }
-  .farm-card-body {
-    padding: 17px;
-  }
-  .farm-photo-title h2 {
-    font-size: 19px;
-  }
+@media (max-width: 599px) {
   .farm-summary-row {
     gap: 12px;
   }
-  .farm-summary-row > div {
-    gap: 8px;
-  }
   .farm-summary-row > div > span:last-child {
-    font-size: 9px;
+    flex-basis: 100%;
   }
   .farm-summary-row :global(.icon-tile) {
     display: none;
   }
-  .zone-row-actions {
-    gap: 2px;
-  }
-  .zone-row-actions > :global(.icon-button) {
-    width: 28px;
-  }
-  .zone-row-actions > :global(.icon-button) > svg {
-    width: 14px;
-  }
-  .farm-zone-row {
-    gap: 7px;
-  }
-}
-@media (max-width: 899px) {
-  .farm-summary-row :global(.icon-tile) {
-    display: flex;
-  }
-}
-@media (max-width: 699px) {
-  .farm-cards {
-    grid-template-columns: 1fr;
-  }
-  .farm-summary-row > div {
-    flex-wrap: wrap;
-    gap: 7px;
-  }
-  .farm-summary-row > div > span:last-child {
-    flex-basis: 100%;
-    font-size: 9px;
-  }
-  .farm-summary-row :global(.icon-tile):global(.small) {
-    width: 30px;
-    height: 30px;
-  }
-  .farm-summary-row strong {
-    font-size: 21px;
-  }
-  .farm-photo-title h2 {
-    font-size: 24px;
-  }
-  .farm-zone-row > div:nth-child(2) {
-    min-width: 140px;
-  }
-  .zone-row-actions > :global(.icon-button) {
-    width: 36px;
-    height: 38px;
-  }
-  .zone-row-actions > :global(.icon-button) > svg {
-    width: 17px;
-  }
-  .farm-zone-row p {
-    font-size: 10px;
-  }
-  .device-state {
-    font-size: 9px;
-  }
-}
-@media (max-width: 599px) {
-  .farm-summary-row {
-    gap: 14px;
-    margin-bottom: 23px;
-  }
-  .farm-summary-row strong {
-    font-size: 21px;
-  }
-  .farm-summary-row :global(.icon-tile):global(.small) {
-    width: 27px;
-    height: 29px;
-    border-radius: 7px;
-  }
-  .farm-summary-row :global(.icon-tile) > svg {
-    width: 17px;
-  }
-  .farm-summary-row > div > span:last-child {
-    font-size: 8px;
-    line-height: 1.8;
+  .farm-card-body {
+    padding: 16px;
   }
   .search-field {
     width: 100%;
   }
-  :global(.section-toolbar):has(.search-field) {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
   :global(.section-toolbar):has(.search-field) > :global(.badge) {
     display: none;
   }
-  .farm-card-photo {
-    height: 190px;
-  }
   .farm-photo-title {
-    left: 19px;
-    right: 19px;
-  }
-  .farm-photo-title h2 {
-    font-size: 23px;
-  }
-  .farm-card-body {
-    padding: 17px;
-  }
-  .farm-card-body > :global(.panel-title) > h3 {
-    font-size: 12px;
-  }
-  .farm-card-body > :global(.panel-title) > :global(.text-link) {
-    font-size: 10px;
-  }
-  .farm-zone-row {
-    padding: 18px 0;
-    gap: 10px;
-  }
-  .farm-zone-row > div:nth-child(2) {
-    min-width: 130px;
-  }
-  .farm-zone-row h3 {
-    font-size: 12px;
-  }
-  .farm-zone-row p {
-    font-size: 9px;
-  }
-  .zone-row-actions {
-    gap: 2px;
-  }
-  .zone-row-actions > :global(.icon-button) {
-    width: 30px;
-    height: 38px;
-  }
-  .zone-row-actions > :global(.icon-button) > svg {
-    width: 15px;
-  }
-  .device-state,
-  .farm-card-footer > :global(.muted) {
-    font-size: 8px;
-  }
-  .farm-card-footer > :global(.text-link) {
-    font-size: 9px;
-  }
-  .farm-bottom-note {
-    margin-top: 22px;
-  }
-}
-@media (max-width: 359px) {
-  .farm-zone-row > :global(.zone-number) {
-    display: none;
-  }
-  .zone-row-actions > :global(.icon-button) {
-    width: 28px;
-  }
-  .farm-zone-row {
-    gap: 5px;
-  }
-  .farm-summary-row :global(.icon-tile) {
-    display: none !important;
-  }
-  .farm-summary-row strong {
-    font-size: 21px;
-  }
-}
-@media (max-width: 599px) {
-  .farm-zone-row h3 {
-    font-size: 13px;
-  }
-  .farm-zone-row p {
-    font-size: 11px;
-  }
-  .zone-row-actions > :global(.icon-button) {
-    min-width: 36px;
-    min-height: 44px;
-  }
-  .device-state,
-  .farm-card-footer > :global(.muted),
-  .farm-card-footer > :global(.text-link) {
-    font-size: 10px;
+    padding-inline: 16px;
   }
 }

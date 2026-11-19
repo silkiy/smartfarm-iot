@@ -14,7 +14,7 @@ export function Irrigation() {
   const current = zones.filter((z) => z.farmId === farmId);
   const zone = current.find((z) => z.id === selectedZoneId) ?? current[0];
   return (
-    <>
+    <div className="page-stack">
       <PageHeading
         title="Kontrol irigasi"
         description="Siapkan kebutuhan air per zona sebelum perangkat dihubungkan."
@@ -64,7 +64,7 @@ export function Irrigation() {
             </button>
           </div>
           {mode === "manual" ? (
-            <section className="panel">
+            <section className="panel stack">
               <h2>{zone.name}</h2>
               <div className="info-banner">
                 <Icon name="info" />
@@ -82,6 +82,6 @@ export function Irrigation() {
           )}
         </>
       )}
-    </>
+    </div>
   );
 }

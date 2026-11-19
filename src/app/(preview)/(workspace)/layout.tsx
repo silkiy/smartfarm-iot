@@ -4,6 +4,7 @@ import { WorkspaceProvider } from "@/features/workspace/workspace-provider";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { WorkspaceStatus } from "@/components/ui/workspace-status";
 
 // This boundary waits for a private session and account data, not an instant UI.
 export const instant = false;
@@ -14,13 +15,7 @@ export default function WorkspaceLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense
-      fallback={
-        <p className="panel" role="status">
-          Memuat sesi…
-        </p>
-      }
-    >
+    <Suspense fallback={<WorkspaceStatus message="Memuat sesi akun Anda…" />}>
       <AuthenticatedWorkspace>{children}</AuthenticatedWorkspace>
     </Suspense>
   );

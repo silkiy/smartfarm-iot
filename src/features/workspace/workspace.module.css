@@ -22,6 +22,9 @@
   opacity: 1;
   transform: translate(-50%, 0);
 }
+.toast-error {
+  background: var(--red);
+}
 @media (max-width: 899px) {
   .toast {
     bottom: 90px;
@@ -29,7 +32,7 @@
 }
 @media (max-width: 599px) {
   .toast {
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 @media print {

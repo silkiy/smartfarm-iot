@@ -137,7 +137,11 @@ export function Login() {
                 </button>
               </div>
             </Field>
-            {error && <p role="alert">{error}</p>}
+            {error && (
+              <p className="form-error" role="alert">
+                {error}
+              </p>
+            )}
             <div className={styles["login-options"]}>
               <span>
                 <Icon name="shield" size={16} />

@@ -1,7 +1,8 @@
 "use client";
 import { Icon } from "@/components/ui/icon";
 import styles from "@/features/analytics/analytics.module.css";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { createChartLayout } from "../lib/chart-layout";
 
 import type { Reading } from "../types";
 export function SensorChart({
@@ -13,25 +14,25 @@ export function SensorChart({
 }) {
   const [point, setPoint] = useState<number | null>(null);
   const gradientId = useId();
-  const max = metric === "moisture" ? 100 : 20;
+  const container = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ width: 640, height: 300 });
+  useEffect(() => {
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (width > 0 && height > 0) setSize({ width, height });
+    });
+    if (container.current) observer.observe(container.current);
+    return () => observer.disconnect();
+  }, []);
   const unit = metric === "moisture" ? "%" : "cm";
-  const positions = readings.map((reading, index) => ({
-    x: 48 + index * (558 / Math.max(1, readings.length - 1)),
-    y: 206 - (reading[metric] / max) * 174,
-  }));
-  const line = positions
-    .map(
-      (position, index) =>
-        `${index === 0 ? "M" : "L"}${position.x},${position.y}`,
-    )
-    .join(" ");
-  const selected =
-    point !== null ? readings[point] : readings[readings.length - 1];
+  const chart = createChartLayout(readings, metric, size.width, size.height);
+  const selectedIndex = point ?? readings.length - 1;
+  const selected = readings[selectedIndex];
   return (
     <>
-      <div className={styles["chart-wrap"]}>
+      <div className={styles["chart-wrap"]} ref={container}>
         <svg
-          viewBox="0 0 640 250"
+          viewBox={`0 0 ${size.width} ${size.height}`}
           role="img"
           aria-label={`Grafik pembacaan ${metric === "moisture" ? "kelembapan tanah" : "ketinggian air"}. ${readings.map((reading) => `${reading.time}: ${reading[metric]}${unit}`).join(", ")}`}
         >
@@ -41,74 +42,78 @@ export function SensorChart({
               <stop offset="100%" stopColor="#b8dc9f" stopOpacity=".03" />
             </linearGradient>
           </defs>
-          {[0, 25, 50, 75, 100].map((value) => (
-            <g key={value}>
+          {chart.ticks.map((tick) => (
+            <g key={tick.value}>
               <line
-                x1="48"
-                x2="606"
-                y1={206 - value * 1.74}
-                y2={206 - value * 1.74}
-                stroke="#e6ebe1"
+                x1={chart.left}
+                x2={chart.right}
+                y1={tick.y}
+                y2={tick.y}
+                stroke="var(--line)"
                 strokeDasharray="4 5"
               />
-              <text x="35" y={210 - value * 1.74} textAnchor="end">
-                {(value / 100) * max}
+              <text x={chart.left - 12} y={tick.y + 4} textAnchor="end">
+                {tick.value}
                 {metric === "moisture" ? "%" : ""}
               </text>
             </g>
           ))}
-          <path d={`${line} L606,206 L48,206 Z`} fill={`url(#${gradientId})`} />
+          {chart.areaPath && (
+            <path
+              data-testid="chart-area"
+              d={chart.areaPath}
+              fill={`url(#${gradientId})`}
+            />
+          )}
           <path
-            d={line}
+            d={chart.linePath}
             fill="none"
             stroke="#075b36"
             strokeWidth="3"
             strokeLinejoin="round"
             strokeLinecap="round"
           />
-          {positions.map((position, index) => (
+          {chart.points.map((position, index) => (
             <circle
+              data-testid="chart-point"
               key={index}
               cx={position.x}
               cy={position.y}
-              r={point === index ? 6 : 3.5}
-              fill={point === index ? "#075b36" : "#fff"}
+              r={selectedIndex === index ? 5 : 3.5}
+              fill={selectedIndex === index ? "#075b36" : "#fff"}
               stroke="#075b36"
               strokeWidth="2"
             />
           ))}
-          {readings
-            .filter(
-              (_, index) =>
-                index % Math.max(1, Math.ceil(readings.length / 6)) === 0 ||
-                index === readings.length - 1,
-            )
-            .map((reading) => {
-              const index = readings.indexOf(reading);
-              return (
-                <text
-                  key={index}
-                  x={positions[index].x}
-                  y="237"
-                  textAnchor="middle"
-                >
-                  {reading.time}
-                </text>
-              );
-            })}
+          {chart.labelIndexes.map((index) => (
+            <text
+              key={index}
+              x={chart.points[index].x}
+              y={chart.bottom + 24}
+              textAnchor="middle"
+            >
+              {readings[index].time.split(", ").map((part, line) => (
+                <tspan key={line} x={chart.points[index].x} dy={line ? 16 : 0}>
+                  {part}
+                </tspan>
+              ))}
+            </text>
+          ))}
         </svg>
       </div>
       <div className={styles["chart-inspector"]}>
-        <Icon name="clock" size={16} />
-        <span>
-          {selected?.time}{" "}
-          <strong>
-            {selected?.[metric]}
-            {unit}
-          </strong>
-        </span>
+        <div className={styles["chart-value"]}>
+          <Icon name="clock" size={16} />
+          <span>
+            {selected?.time}{" "}
+            <strong>
+              {selected?.[metric]}
+              {unit}
+            </strong>
+          </span>
+        </div>
         <label>
-          <span className="sr-only">Pilih titik grafik</span>
+          <span>Pilih pembacaan</span>
           <select
             aria-label="Pilih titik grafik"
             value={point ?? readings.length - 1}

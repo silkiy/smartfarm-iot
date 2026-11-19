@@ -92,7 +92,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className={styles["breadcrumb"]}>
             Ruang kerja <Icon name="chevron" size={14} />
             <strong>
-              {navigation.find((item) => item.href === pathname)?.label}
+              {navigation.find((item) => item.href === pathname)?.label ??
+                (pathname === "/pengguna" ? "Pengguna & penugasan" : "Akun")}
             </strong>
           </div>
           <div className={styles["topbar-actions"]}>
@@ -116,10 +117,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               >
                 {initials}
               </button>
-              <label className={styles["profile-label"]}>
-                <span>{user.name}</span>
+              <div className={styles["profile-label"]}>
+                <span title={user.name}>{user.name}</span>
                 <span>{role}</span>
-              </label>
+              </div>
             </div>
           </div>
         </header>
@@ -159,26 +160,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </nav>
       {profileOpen && (
         <Dialog title="Profil akun" onClose={() => setProfileOpen(false)}>
-          <p>
-            <strong>{user.name}</strong>
-          </p>
-          <p>{user.email}</p>
-          <p>{role}</p>
-          {user.role !== "FIELD_WORKER" && (
-            <Link
-              className="button button-secondary full-width"
-              href="/pengguna"
-              onClick={() => setProfileOpen(false)}
+          <div className={styles["profile-details"]}>
+            <p>
+              <strong>{user.name}</strong>
+            </p>
+            <p>{user.email}</p>
+            <p>{role}</p>
+          </div>
+          <div className={styles["profile-actions"]}>
+            {user.role !== "FIELD_WORKER" && (
+              <Link
+                className="button button-secondary full-width"
+                href="/pengguna"
+                onClick={() => setProfileOpen(false)}
+              >
+                Pengguna & penugasan
+              </Link>
+            )}
+            <button
+              className="button button-primary full-width"
+              onClick={() => signOut({ redirectTo: "/login" })}
             >
-              Pengguna & penugasan
-            </Link>
-          )}
-          <button
-            className="button button-primary full-width"
-            onClick={() => signOut({ redirectTo: "/login" })}
-          >
-            Keluar dari akun
-          </button>
+              Keluar dari akun
+            </button>
+          </div>
         </Dialog>
       )}
     </div>

@@ -5,6 +5,7 @@ import { useWorkspace } from "@/features/workspace/workspace-provider";
 import type { Farm, Zone } from "@/features/workspace/types";
 import type { FarmEditor } from "../types";
 import { FarmForm, ZoneForm } from "./farm-forms";
+import { useState } from "react";
 export function FarmDialogs({
   editor,
   onClose,
@@ -13,75 +14,93 @@ export function FarmDialogs({
   onClose: () => void;
 }) {
   const { removeFarm, removeZone, busy } = useWorkspace();
+  const [error, setError] = useState("");
+  function close() {
+    setError("");
+    onClose();
+  }
   async function deleteFarm(farm: Farm) {
-    if (await removeFarm(farm.id)) onClose();
+    if (await removeFarm(farm.id)) close();
+    else
+      setError(
+        "Lahan belum dapat diarsipkan. Coba lagi setelah koneksi pulih.",
+      );
   }
   async function deleteZone(zone: Zone) {
-    if (await removeZone(zone.id)) onClose();
+    if (await removeZone(zone.id)) close();
+    else
+      setError("Zona belum dapat diarsipkan. Coba lagi setelah koneksi pulih.");
   }
   return (
     <>
       {editor?.type === "farm" && (
-        <FarmForm farm={editor.farm} onClose={() => onClose()} />
+        <FarmForm farm={editor.farm} onClose={close} />
       )}
       {editor?.type === "zone" && (
-        <ZoneForm
-          farmId={editor.farmId}
-          zone={editor.zone}
-          onClose={() => onClose()}
-        />
+        <ZoneForm farmId={editor.farmId} zone={editor.zone} onClose={close} />
       )}
       {editor?.type === "delete-farm" && (
-        <Dialog title="Hapus lahan?" onClose={() => onClose()}>
+        <Dialog
+          title="Hapus lahan?"
+          onClose={close}
+          footer={
+            <div className="dialog-actions">
+              <button className="button button-secondary" onClick={close}>
+                Batal
+              </button>
+              <button
+                className="button button-danger"
+                disabled={busy}
+                onClick={() => deleteFarm(editor.farm)}
+              >
+                Hapus lahan
+              </button>
+            </div>
+          }
+        >
           <p>
             <strong>{editor.farm.name}</strong> beserta zona terkait akan
             diarsipkan. Riwayat tersimpan tetap dipertahankan.
           </p>
-          <div className="dialog-actions">
-            <button
-              className="button button-secondary"
-              onClick={() => onClose()}
-            >
-              Batal
-            </button>
-            <button
-              className="button button-danger"
-              disabled={busy}
-              onClick={() => deleteFarm(editor.farm)}
-            >
-              Hapus lahan
-            </button>
-          </div>
+          {error && (
+            <div className="form-error" role="alert">
+              {error}
+            </div>
+          )}
         </Dialog>
       )}
       {editor?.type === "delete-zone" && (
-        <Dialog title="Hapus zona?" onClose={() => onClose()}>
+        <Dialog
+          title="Hapus zona?"
+          onClose={close}
+          footer={
+            <div className="dialog-actions">
+              <button className="button button-secondary" onClick={close}>
+                Batal
+              </button>
+              <button
+                className="button button-danger"
+                disabled={busy}
+                onClick={() => deleteZone(editor.zone)}
+              >
+                Hapus zona
+              </button>
+            </div>
+          }
+        >
           <p>
             <strong>{editor.zone.name}</strong> akan diarsipkan dan tidak muncul
             pada daftar zona aktif.
           </p>
-          <div className="dialog-actions">
-            <button
-              className="button button-secondary"
-              onClick={() => onClose()}
-            >
-              Batal
-            </button>
-            <button
-              className="button button-danger"
-              disabled={busy}
-              onClick={() => deleteZone(editor.zone)}
-            >
-              Hapus zona
-            </button>
-          </div>
+          {error && (
+            <div className="form-error" role="alert">
+              {error}
+            </div>
+          )}
         </Dialog>
       )}
       {editor?.type === "device" && (
-        <Dialog
-          title={`Perangkat ${editor.zone.name}`}
-          onClose={() => onClose()}
-        >
+        <Dialog title={`Perangkat ${editor.zone.name}`} onClose={close}>
           <Badge tone={editor.zone.online ? "green" : "neutral"}>
             {editor.zone.online
               ? "Perangkat aktif"
@@ -109,10 +128,7 @@ export function FarmDialogs({
             Rincian ini merupakan ilustrasi kebutuhan perangkat. Pendaftaran
             perangkat dan kalibrasi belum terhubung ke layanan IoT.
           </p>
-          <button
-            className="button button-primary full-width"
-            onClick={() => onClose()}
-          >
+          <button className="button button-primary full-width" onClick={close}>
             Tutup rincian
           </button>
         </Dialog>

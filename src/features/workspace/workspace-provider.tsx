@@ -11,6 +11,7 @@ import {
 } from "react";
 import type { IrrigationRule, WorkspaceSnapshot, WorkspaceRole } from "./types";
 import styles from "./workspace.module.css";
+import { WorkspaceStatus } from "@/components/ui/workspace-status";
 
 type WorkspaceValue = WorkspaceSnapshot & {
   farmId: string;
@@ -39,7 +40,14 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [farmSelection, setFarmId] = useState("");
   const [selectedZoneId, setSelectedZoneId] = useState("");
   const [busy, setBusy] = useState(false);
-  const [toast, notify] = useState("");
+  const [toast, setToast] = useState<{
+    message: string;
+    isError: boolean;
+  } | null>(null);
+  const notify = useCallback(
+    (message: string) => setToast({ message, isError: false }),
+    [],
+  );
   const refresh = useCallback(async () => {
     setData(await requestJson<WorkspaceSnapshot>("/api/workspace"));
   }, []);
@@ -60,7 +68,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => {
     if (!toast) return;
-    const timer = setTimeout(() => notify(""), 5000);
+    const timer = setTimeout(() => setToast(null), 5000);
     return () => clearTimeout(timer);
   }, [toast]);
   async function mutate(path: string, method: string, fields?: unknown) {
@@ -79,7 +87,10 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       }
       return result;
     } catch (e) {
-      notify(e instanceof Error ? e.message : "Perubahan gagal disimpan.");
+      setToast({
+        message: e instanceof Error ? e.message : "Perubahan gagal disimpan.",
+        isError: true,
+      });
       return null;
     } finally {
       setBusy(false);
@@ -87,23 +98,13 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }
   if (error && !data)
     return (
-      <section className="panel" role="alert">
-        <h1>Data belum dapat dimuat</h1>
-        <p>{error}</p>
-        <button
-          className="button button-primary"
-          onClick={() => window.location.reload()}
-        >
-          Coba lagi
-        </button>
-      </section>
+      <WorkspaceStatus
+        title="Data belum dapat dimuat"
+        message={error}
+        onRetry={() => window.location.reload()}
+      />
     );
-  if (!data)
-    return (
-      <p role="status" className="panel">
-        Memuat ruang kerja…
-      </p>
-    );
+  if (!data) return <WorkspaceStatus />;
   const farmId = data.farms.some((f) => f.id === farmSelection)
     ? farmSelection
     : (data.farms[0]?.id ?? "");
@@ -157,11 +158,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     >
       {children}
       <div
-        className={`${styles.toast} ${toast ? styles["toast-visible"] : ""}`}
+        className={`${styles.toast} ${toast ? styles["toast-visible"] : ""} ${toast?.isError ? styles["toast-error"] : ""}`}
         role="status"
         aria-live="polite"
       >
-        {toast}
+        {toast?.message}
       </div>
     </Context.Provider>
   );

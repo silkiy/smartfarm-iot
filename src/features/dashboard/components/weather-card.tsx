@@ -1,6 +1,9 @@
 "use client";
 import { requestJson } from "@/lib/api-client";
 import { useEffect, useState } from "react";
+import styles from "../dashboard.module.css";
+import { Icon } from "@/components/ui/icon";
+import { cn } from "@/lib/cn";
 export function WeatherCard({
   farmId,
   hasCoordinates,
@@ -35,7 +38,7 @@ export function WeatherCard({
     return () => controller.abort();
   }, [farmId, hasCoordinates]);
   return (
-    <section className="panel">
+    <section className={cn("panel form-stack", styles["weather-panel"])}>
       <h2>Cuaca lahan</h2>
       {!hasCoordinates ? (
         <p>Isi lintang dan bujur pada informasi lahan untuk melihat cuaca.</p>
@@ -45,10 +48,10 @@ export function WeatherCard({
         <p role="status">Memuat cuaca…</p>
       ) : (
         <>
-          <p>
+          <p className={styles["weather-temperature"]}>
             <strong>{weather.temperatureC} °C</strong>
           </p>
-          <p>
+          <p className={styles["weather-details"]}>
             Kelembapan {weather.humidityPercent}% · Angin {weather.windSpeedKmh}{" "}
             km/j
           </p>
@@ -68,6 +71,10 @@ export function WeatherCard({
               Open-Meteo
             </a>
           </small>
+          <p className="muted">
+            <Icon name="info" size={16} /> Cuaca wilayah dari model Open-Meteo,
+            bukan pembacaan sensor lahan.
+          </p>
         </>
       )}
     </section>

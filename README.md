@@ -48,6 +48,7 @@ Test browser memerlukan MongoDB pengujian khusus dengan nama `smartfarm_test_*` 
 
 - [Backend, konfigurasi akun, API, cuaca, WhatsApp dan pengujian](BACKEND.md)
 - [Dataset dummy, akun dan penanda simulasi](DUMMY_DATA.md)
+- [Cakupan audit UI, keadaan layar dan pengujiannya](UI_AUDIT.md)
 - [Arsitektur dan lokasi kode](ARCHITECTURE.md)
 - [Maintenance dan perintah rutin](CONTRIBUTING.md)
 

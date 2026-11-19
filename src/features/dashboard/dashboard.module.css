@@ -1,17 +1,16 @@
 .timestamp {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 10px;
+  gap: 8px;
+  font-size: 12px;
 }
 .overview-grid {
   display: grid;
-  grid-template-columns: 1.65fr 1fr;
-  gap: 20px;
-  margin-bottom: 20px;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 24px;
 }
 .farm-hero {
-  min-height: 242px;
+  min-height: 260px;
   position: relative;
   border-radius: var(--radius);
   overflow: hidden;
@@ -23,148 +22,98 @@
 .farm-hero-shade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(8, 38, 21, 0.7),
-    rgba(8, 38, 21, 0.1)
-  );
+  background: linear-gradient(90deg, #082615c9, #08261555);
 }
 .farm-hero-content {
   position: relative;
-  padding: 24px 28px;
+  padding: 24px;
   color: #fff;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 242px;
-  gap: 20px;
+  min-height: 260px;
+  gap: 24px;
+  overflow-wrap: anywhere;
 }
 .hero-location {
   color: #e1eadd;
-  font-size: 10px;
+  font-size: 12px;
   display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 4px;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.hero-location > svg {
+  margin-top: 2px;
 }
 .farm-hero h2 {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.7px;
+  font-size: 28px;
+  line-height: 1.35;
 }
 .hero-details {
   display: flex;
   flex-wrap: wrap;
-  gap: 0;
-  font-size: 10px;
+  gap: 8px 16px;
+  font-size: 12px;
   color: #e0e9de;
-  margin-top: 10px;
-}
-.hero-details span + span:before {
-  content: "";
-  display: inline-block;
-  height: 10px;
-  border-left: 1px solid #ffffff66;
-  margin: 0 12px;
+  margin-top: 12px;
 }
 .hero-link {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 10px;
+  gap: 8px;
+  font-size: 13px;
   font-weight: 600;
   width: fit-content;
+  min-height: 44px;
 }
 .weather-panel {
-  padding: 22px 25px;
   background: #eaf0e4;
-  border: 1px solid #e1e7da;
-  border-radius: var(--radius);
+  border-color: #e1e7da;
+  gap: 16px;
 }
-.weather-panel :global(.panel-title) h2 {
-  font-size: 12px;
+.weather-panel > h2 {
+  font-size: 16px;
 }
-.weather-panel :global(.badge) {
-  background: #ffffff80;
-}
-.weather-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 19px 0 20px;
-  gap: 12px;
-}
-.weather-main strong {
-  font-size: 54px;
-  line-height: 1.1;
-  font-weight: 650;
-  letter-spacing: -3px;
-}
-.weather-main strong span {
-  font-size: 26px;
-  letter-spacing: -1px;
-  vertical-align: top;
-  line-height: 1.7;
-}
-.weather-main p {
-  font-size: 12px;
-  color: #566947;
-  margin-top: 4px;
-}
-.weather-art {
-  width: 88px;
-  height: 80px;
-  position: relative;
-  color: #c8a345;
-  flex-shrink: 0;
-}
-.weather-art > svg:first-child {
-  position: absolute;
-  right: 1px;
-  top: 0;
-  stroke-width: 1.1;
-}
-.weather-art > svg:last-child {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  fill: #eff4eb;
-  color: #859c79;
-  stroke-width: 1.2;
+.weather-temperature {
+  font-size: 40px;
+  line-height: 1.2;
+  color: var(--ink);
 }
 .weather-details {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
+  font-size: 13px;
 }
-.weather-details > span {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 9px;
-  color: #5b685b;
+.weather-panel > small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.75;
 }
-.weather-details strong {
-  color: #293c27;
-  font-size: 10px;
-  margin-left: 2px;
-}
-.weather-note {
-  font-size: 9px;
-  margin-top: 13px;
-  color: #5b685b;
+.weather-panel a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .metrics-grid {
   display: grid;
-  grid-template-columns: 1fr 1.1fr 1fr;
-  gap: 20px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.moisture-panel,
+.water-panel,
+.pump-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.moisture-panel :global(.empty-state) {
+  flex: 1;
+  padding: 24px 12px;
 }
 .gauge {
   position: relative;
   width: 180px;
   height: 180px;
-  margin: 10px auto 8px;
+  max-width: 100%;
+  margin: 16px auto;
 }
 .gauge svg {
   width: 100%;
@@ -189,68 +138,65 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 .gauge-label > strong {
-  font-size: 43px;
-  letter-spacing: -2px;
+  font-size: 42px;
   line-height: 1.1;
 }
-.gauge-label > strong span {
+.gauge-label > strong > span {
   font-size: 22px;
-  letter-spacing: -1px;
-  margin-left: 2px;
+  margin-left: 4px;
 }
 .gauge-label > span {
-  font-size: 9px;
+  font-size: 12px;
+  max-width: 120px;
+  text-align: center;
   color: var(--muted);
 }
 .metric-foot {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   border-top: 1px solid var(--line);
-  padding-top: 15px;
+  padding-top: 16px;
   margin-top: auto;
-  min-height: 39px;
+  min-height: 48px;
 }
 .metric-foot small {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
 }
 .metric-foot :global(.muted) {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 9px;
-}
-.moisture-panel,
-.water-panel,
-.pump-panel {
-  display: flex;
-  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
 }
 .water-visual {
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 16px;
   flex: 1;
-  min-height: 195px;
+  padding: 24px 0;
+  min-height: 220px;
 }
 .water-scale {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 126px;
-  font-size: 8px;
-  color: #5b685b;
-  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--muted);
 }
 .water-tank {
   width: 52px;
-  flex-shrink: 0;
   height: 140px;
+  flex-shrink: 0;
   border: 1px solid #d7e9ec;
   border-radius: 8px;
   overflow: hidden;
@@ -263,7 +209,6 @@
   color: #2f8ba0;
 }
 .water-fill {
-  height: 30%;
   width: 100%;
   background: #b8dfe7;
   position: absolute;
@@ -273,32 +218,31 @@
 .water-tank > svg {
   position: relative;
 }
+.water-reading {
+  min-width: 0;
+}
 .water-reading strong {
-  font-size: 38px;
+  font-size: 36px;
   line-height: 1.2;
-  letter-spacing: -1.5px;
 }
 .water-reading strong span {
-  font-size: 15px;
+  font-size: 16px;
   margin-left: 4px;
   color: var(--muted);
-  letter-spacing: 0;
 }
 .water-reading p {
-  font-size: 10px;
-  margin: 6px 0;
-}
-.water-reading > :global(.muted) {
-  font-size: 9px;
+  font-size: 12px;
+  margin: 8px 0;
+  max-width: 150px;
 }
 .pump-indicator {
-  width: 65px;
-  height: 65px;
+  width: 64px;
+  height: 64px;
   display: grid;
   place-items: center;
   background: #f0f3ed;
   border-radius: 50%;
-  color: #83927b;
+  color: #71806a;
   margin: 24px auto 12px;
 }
 .pump-active {
@@ -307,50 +251,52 @@
 }
 .pump-panel h3 {
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
 }
 .actuator-row {
   display: flex;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 12px;
   justify-content: center;
-  margin: 13px 0 21px;
+  margin: 16px 0 24px;
 }
 .actuator-row > span {
-  font-size: 9px;
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
   color: var(--muted);
 }
 .actuator-row strong {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--ink);
-  margin-left: 5px;
 }
 .pump-panel > :global(.button) {
   margin-top: auto;
-  font-size: 11px;
-  min-height: 39px;
 }
 .attention-note {
   background: var(--amber-bg);
   border: 1px solid #f0e3bf;
   border-radius: 10px;
-  padding: 15px 18px;
+  padding: 16px;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
   color: var(--amber);
-  margin: 0 0 30px;
+}
+.attention-note > div {
+  flex: 1 1 240px;
+  min-width: 0;
 }
 .attention-note strong {
-  font-size: 11px;
+  font-size: 14px;
 }
 .attention-note p {
-  font-size: 10px;
-  margin-top: 2px;
+  font-size: 13px;
+  margin-top: 8px;
   color: #7d5e2c;
 }
 .attention-note :global(.text-link) {
-  font-size: 10px;
-  white-space: nowrap;
   color: var(--amber);
   margin-left: auto;
 }
@@ -358,87 +304,82 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 14px;
-  margin: 27px 0 16px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 .section-title h2 {
-  font-size: 17px;
+  font-size: 18px;
 }
 .section-title p {
-  font-size: 11px;
-  margin-top: 4px;
+  font-size: 13px;
+  margin-top: 8px;
 }
 .zones-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-}
-.zone-card {
-  padding: 19px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 24px;
 }
 .zone-card :global(.panel-title) {
-  gap: 8px;
+  flex-wrap: wrap;
 }
 .zone-name {
   display: flex;
-  align-items: center;
-  gap: 9px;
+  align-items: flex-start;
+  gap: 8px;
   min-width: 0;
 }
 .zone-name h3 {
-  font-size: 12px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
 }
 .zone-readings {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 24px;
-  gap: 20px;
+  gap: 16px;
 }
 .zone-readings > div + div {
   border-left: 1px solid var(--line);
-  padding-left: 20px;
+  padding-left: 16px;
 }
 .zone-readings span {
-  font-size: 9px;
+  font-size: 12px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: var(--muted);
 }
 .zone-readings strong {
   font-size: 30px;
-  letter-spacing: -1px;
   display: block;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 .zone-readings small {
-  font-size: 12px;
-  letter-spacing: 0;
+  font-size: 14px;
   color: var(--muted);
-  margin-left: 3px;
-  font-weight: 500;
+  margin-left: 4px;
 }
 .zone-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   border-top: 1px solid var(--line);
   margin-top: 20px;
-  padding-top: 10px;
-  gap: 10px;
+  padding-top: 12px;
 }
 .zone-footer :global(.muted) {
-  font-size: 8px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 .zone-footer a {
-  min-width: 36px;
-  min-height: 36px;
+  min-width: 44px;
+  min-height: 44px;
   display: grid;
   place-items: center;
-  border-radius: 6px;
+  border-radius: 8px;
   color: var(--green);
 }
 .zone-footer a:hover {
@@ -446,9 +387,6 @@
 }
 .zone-offline {
   background: #fafbf8;
-}
-.zone-offline .zone-readings {
-  color: #7c887b;
 }
 .spin {
   animation: spin 1s linear infinite;
@@ -458,402 +396,28 @@
     transform: rotate(360deg);
   }
 }
-@media (min-width: 1600px) {
-  .farm-hero,
-  .farm-hero-content {
-    min-height: 280px;
-  }
-  .weather-main {
-    margin-top: 30px;
-    margin-bottom: 30px;
-  }
-  .gauge {
-    width: 190px;
-    height: 190px;
-  }
-  .water-visual {
-    min-height: 215px;
-  }
-}
 @media (max-width: 1199px) {
   .metrics-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .pump-panel {
     grid-column: 1/-1;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    column-gap: 24px;
   }
-  .pump-panel :global(.panel-title) {
-    grid-column: 1/-1;
-    margin-bottom: 8px;
+}
+@media (max-width: 699px) {
+  .overview-grid,
+  .metrics-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
-  .pump-panel .pump-indicator {
-    grid-row: 2/4;
-    margin: 0;
-    width: 50px;
-    height: 50px;
-    display: none;
-  }
-  .pump-panel h3 {
-    text-align: left;
-  }
-  .pump-panel .actuator-row {
+  .water-visual {
     justify-content: flex-start;
-    grid-column: 1;
-    margin: 8px 0 0;
-  }
-  .pump-panel > :global(.button) {
-    grid-column: 2;
-    grid-row: 2/4;
-    margin: 0;
-  }
-  .zones-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .zone-card:last-child {
-    grid-column: 1/-1;
-  }
-  .overview-grid {
-    grid-template-columns: 1.35fr 1fr;
   }
   .farm-hero h2 {
-    font-size: 23px;
-  }
-  .farm-hero-content {
-    padding: 22px;
-  }
-  .weather-panel {
-    padding: 20px;
-  }
-  .weather-details {
-    gap: 10px;
+    font-size: 24px;
   }
 }
 @media (max-width: 599px) {
   .timestamp {
-    font-size: 9px;
-  }
-  .overview-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-    margin-bottom: 14px;
-  }
-  .farm-hero,
-  .farm-hero-content {
-    min-height: 225px;
-  }
-  .farm-hero-content {
-    padding: 20px;
-    gap: 24px;
-  }
-  .farm-hero h2 {
-    font-size: 25px;
-  }
-  .hero-details {
-    font-size: 10px;
-  }
-  .weather-panel {
-    padding: 18px 20px;
-  }
-  .weather-main {
-    margin: 15px 0;
-  }
-  .weather-main strong {
-    font-size: 46px;
-  }
-  .weather-art {
-    height: 67px;
-    width: 80px;
-  }
-  .weather-art > svg:first-child,
-  .weather-art > svg:last-child {
-    width: 54px;
-    height: 54px;
-  }
-  .weather-details {
-    gap: 20px;
-  }
-  .weather-note {
-    font-size: 9px;
-  }
-  .metrics-grid {
-    gap: 14px;
-    margin-bottom: 14px;
-  }
-  .metrics-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  .metrics-grid :global(.panel-title) h2 {
-    font-size: 11px;
-  }
-  .metrics-grid :global(.icon-tile):global(.small) {
     display: none;
-  }
-  .moisture-panel {
-    padding: 15px;
-  }
-  .gauge {
-    width: 130px;
-    height: 130px;
-    max-width: 100%;
-    margin: 14px auto;
-  }
-  .gauge-label > strong {
-    font-size: 34px;
-  }
-  .gauge-label > strong span {
-    font-size: 18px;
-  }
-  .gauge-label > span {
-    font-size: 7px;
-  }
-  .metric-foot {
-    flex-wrap: wrap;
-    gap: 6px;
-    padding-top: 11px;
-  }
-  .metric-foot :global(.badge) {
-    font-size: 8px;
-    padding: 3px 6px;
-  }
-  .metric-foot small {
-    font-size: 8px;
-  }
-  .water-panel {
-    padding: 15px;
-  }
-  .water-visual {
-    min-height: 158px;
-    gap: 9px;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 15px 0;
-  }
-  .water-scale {
-    display: none;
-  }
-  .water-tank {
-    height: 75px;
-    width: 35px;
-    padding-bottom: 8px;
-  }
-  .water-tank > svg {
-    width: 19px;
-  }
-  .water-reading strong {
-    font-size: 27px;
-  }
-  .water-reading strong span {
-    font-size: 10px;
-  }
-  .water-reading p {
-    font-size: 8px;
-    margin: 4px 0;
-  }
-  .water-reading > :global(.muted) {
-    display: none;
-  }
-  .metric-foot :global(.muted) {
-    font-size: 8px;
-    align-items: flex-start;
-  }
-  .metric-foot :global(.muted) > svg {
-    width: 12px;
-  }
-  .pump-panel {
-    column-gap: 12px;
-  }
-  .pump-panel :global(.panel-title) {
-    margin-bottom: 13px;
-  }
-  .pump-panel h3 {
-    font-size: 11px;
-  }
-  .pump-panel > :global(.button) {
-    padding: 10px 11px;
-    font-size: 10px;
-  }
-  .actuator-row {
-    gap: 10px;
-  }
-  .actuator-row > span {
-    font-size: 8px;
-  }
-  .actuator-row strong {
-    font-size: 9px;
-    margin-left: 3px;
-  }
-  .attention-note {
-    padding: 13px;
-    align-items: flex-start;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-  }
-  .attention-note > svg {
-    width: 18px;
-    margin-top: 2px;
-  }
-  .attention-note > div {
-    flex: 1;
-    min-width: 180px;
-  }
-  .attention-note strong {
-    font-size: 10px;
-  }
-  .attention-note p {
-    font-size: 10px;
-    line-height: 1.7;
-  }
-  .attention-note :global(.text-link) {
-    margin-left: 28px;
-    min-height: 30px;
-  }
-  .section-title {
-    align-items: flex-start;
-    gap: 10px;
-    margin-top: 24px;
-  }
-  .section-title h2 {
-    font-size: 16px;
-  }
-  .section-title p {
-    font-size: 10px;
-  }
-  .section-title :global(.badge) {
-    font-size: 8px;
-    white-space: normal;
-    flex-shrink: 0;
-    max-width: 105px;
-  }
-  .zones-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .zone-card:last-child {
-    grid-column: auto;
-  }
-  .zone-card {
-    padding: 18px;
-  }
-  .zone-name h3 {
-    font-size: 13px;
-  }
-  .zone-readings {
-    margin-top: 20px;
-  }
-  .zone-readings span {
-    font-size: 10px;
-  }
-  .zone-readings strong {
-    font-size: 30px;
-  }
-  .zone-footer :global(.muted) {
-    font-size: 9px;
-  }
-}
-@media (max-width: 359px) {
-  .metrics-grid {
-    grid-template-columns: 1fr;
-  }
-  .metrics-grid :global(.icon-tile):global(.small) {
-    display: flex;
-  }
-  .gauge {
-    width: 165px;
-    height: 165px;
-  }
-  .gauge-label > strong {
-    font-size: 42px;
-  }
-  .gauge-label > span {
-    font-size: 9px;
-  }
-  .water-visual {
-    justify-content: flex-start;
-    gap: 20px;
-  }
-  .water-tank {
-    height: 100px;
-    width: 45px;
-  }
-  .water-reading strong {
-    font-size: 34px;
-  }
-  .water-reading p {
-    font-size: 10px;
-  }
-  .water-reading > :global(.muted) {
-    display: block;
-    font-size: 9px;
-  }
-  .water-scale {
-    display: flex;
-    height: 90px;
-  }
-  .pump-panel {
-    display: flex;
-    gap: 12px;
-  }
-  .pump-panel > :global(.button) {
-    width: 100%;
-  }
-  .pump-panel .actuator-row {
-    margin: 0;
-  }
-  .hero-details span + span:before {
-    margin-inline: 8px;
-  }
-  .farm-hero h2 {
-    font-size: 22px;
-  }
-  .section-title {
-    flex-wrap: wrap;
-  }
-}
-@media (max-width: 599px) {
-  :global(.section-toolbar) .timestamp {
-    display: none;
-  }
-}
-.zone-name h3 {
-  overflow-wrap: anywhere;
-}
-@media (max-width: 599px) {
-  .hero-location,
-  .hero-details,
-  .weather-details > span {
-    font-size: 11px;
-  }
-  .weather-panel :global(.panel-title) h2,
-  .metrics-grid :global(.panel-title) h2 {
-    font-size: 12px;
-  }
-  .gauge-label > span {
-    font-size: 9px;
-    max-width: 92px;
-    text-align: center;
-    line-height: 1.5;
-  }
-  .water-reading p,
-  .metric-foot small,
-  .metric-foot :global(.muted) {
-    font-size: 9px;
-  }
-  .zone-readings span,
-  .zone-footer :global(.muted),
-  .attention-note p {
-    font-size: 11px;
-  }
-  .zone-footer a {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  .zone-name h3 {
-    font-size: 13px;
   }
 }

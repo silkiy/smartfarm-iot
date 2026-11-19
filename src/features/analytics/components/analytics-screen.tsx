@@ -10,6 +10,8 @@ import { FarmSelect } from "@/features/farms/components/farm-select";
 import { SensorChart } from "./sensor-chart";
 import { createReportCsv } from "../lib/report-csv";
 import type { ReportData } from "@/domain/report";
+import { Badge } from "@/components/ui/badge";
+import styles from "../analytics.module.css";
 const today = () =>
   new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
 export function Analytics() {
@@ -82,7 +84,7 @@ export function Analytics() {
       }),
     }));
   return (
-    <>
+    <div className="page-stack">
       <PageHeading
         title="Grafik & laporan"
         description={
@@ -116,7 +118,8 @@ export function Analytics() {
           </select>
         </label>
       </div>
-      <section className="panel">
+      <section className="panel stack">
+        <h2>Filter laporan</h2>
         <div className="form-grid">
           <Field label="Dari tanggal">
             <input
@@ -137,12 +140,16 @@ export function Analytics() {
             />
           </Field>
         </div>
+      </section>
+      <section className="panel stack" aria-label="Laporan pembacaan sensor">
         {invalid ? (
-          <p role="alert">
+          <p className="form-error" role="alert">
             Pilih rentang tanggal yang valid, maksimal 31 hari.
           </p>
         ) : error ? (
-          <p role="alert">{error}</p>
+          <p className="form-error" role="alert">
+            {error}
+          </p>
         ) : !farm ? (
           <EmptyState
             title="Belum ada lahan"
@@ -157,57 +164,93 @@ export function Analytics() {
           />
         ) : (
           <>
-            <Field label="Jenis pembacaan">
-              <select
-                value={metric}
-                onChange={(e) => setMetric(e.target.value as typeof metric)}
-              >
-                <option value="moisture">Kelembapan tanah (%)</option>
-                <option value="water">Ketinggian air (cm)</option>
-              </select>
-            </Field>
-            <p>
-              {readings.length} pembacaan · Rata-rata kelembapan{" "}
-              {(
-                readings.reduce((n, r) => n + r.moisture, 0) / readings.length
-              ).toFixed(1)}
-              %
-            </p>
+            <div className={styles["chart-header"]}>
+              <div className={styles["chart-summary"]}>
+                <h2>Riwayat pembacaan</h2>
+                <p>
+                  {readings.length} pembacaan · Rata-rata kelembapan{" "}
+                  <strong>
+                    {(
+                      readings.reduce((n, r) => n + r.moisture, 0) /
+                      readings.length
+                    ).toFixed(1)}
+                    %
+                  </strong>
+                </p>
+              </div>
+              <div className={styles["metric-control"]}>
+                <Field label="Jenis pembacaan">
+                  <select
+                    value={metric}
+                    onChange={(e) => setMetric(e.target.value as typeof metric)}
+                  >
+                    <option value="moisture">Kelembapan tanah (%)</option>
+                    <option value="water">Ketinggian air (cm)</option>
+                  </select>
+                </Field>
+              </div>
+            </div>
             <SensorChart
               key={query + metric}
               readings={chartReadings}
               metric={metric}
             />
             <p className="muted">
-              Grafik menampilkan cuplikan waktu; CSV memuat seluruh pembacaan
-              pada rentang terpilih.
+              {readings.length === 1
+                ? "Baru ada satu pembacaan. Tren dapat dilihat setelah tersedia lebih banyak data."
+                : "Grafik menampilkan cuplikan pembacaan pada rentang terpilih."}
             </p>
           </>
         )}
-        <button
-          className="button button-primary"
-          disabled={!data || invalid || Boolean(error)}
-          onClick={exportCsv}
-        >
-          Unduh CSV
-        </button>
+        <div className={styles["report-footer"]}>
+          <p>
+            CSV memuat seluruh pembacaan pada rentang tanggal dan zona terpilih.
+          </p>
+          <button
+            className="button button-primary"
+            disabled={!data || invalid || Boolean(error)}
+            onClick={exportCsv}
+          >
+            Unduh CSV
+          </button>
+        </div>
       </section>
-      <section className="panel">
+      <section className="panel stack">
         <h2>Riwayat irigasi</h2>
         {data?.events.length ? (
-          data.events.map((e) => (
-            <p key={e.id}>
-              {new Date(e.time).toLocaleString("id-ID", {
-                timeZone: "Asia/Jakarta",
-              })}{" "}
-              · {e.isDemo ? "DUMMY · " : ""}
-              {e.trigger} · {e.result}
-            </p>
-          ))
+          <ul className={styles["event-list"]}>
+            {data.events.map((e) => (
+              <li className={styles["event-row"]} key={e.id}>
+                <div>
+                  <strong>
+                    {e.trigger === "MANUAL"
+                      ? "Irigasi manual"
+                      : "Irigasi otomatis"}
+                  </strong>
+                  <time dateTime={e.time}>
+                    {new Date(e.time).toLocaleString("id-ID", {
+                      timeZone: "Asia/Jakarta",
+                    })}{" "}
+                    WIB
+                  </time>
+                </div>
+                <div className="form-actions">
+                  {e.isDemo && <Badge tone="neutral">DUMMY</Badge>}
+                  <Badge tone={e.result === "SUCCESS" ? "green" : "neutral"}>
+                    {e.result === "FAILED"
+                      ? "Gagal"
+                      : e.result === "SUCCESS"
+                        ? "Selesai"
+                        : e.result}
+                  </Badge>
+                </div>
+              </li>
+            ))}
+          </ul>
         ) : (
           <p>Belum ada kejadian irigasi pada rentang ini.</p>
         )}
       </section>
-    </>
+    </div>
   );
 }

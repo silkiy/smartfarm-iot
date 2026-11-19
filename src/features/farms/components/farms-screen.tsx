@@ -23,7 +23,7 @@ export function Farms() {
   );
 
   return (
-    <>
+    <div className="page-stack">
       <PageHeading
         title="Lahan & sensor"
         description="Kelola lahan, petak, dan perangkat dari satu tempat."
@@ -131,6 +131,6 @@ export function Farms() {
         </p>
       </div>
       <FarmDialogs editor={editor} onClose={() => setEditor(null)} />
-    </>
+    </div>
   );
 }

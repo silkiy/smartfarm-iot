@@ -47,7 +47,7 @@ export function Dashboard() {
     }
   }
   return (
-    <>
+    <div className="page-stack">
       <PageHeading
         title="Dashboard lahan"
         description={`Selamat datang, ${user.name}. Mari lihat kondisi lahan Anda.`}
@@ -124,7 +124,12 @@ export function Dashboard() {
                   <span>0 cm</span>
                 </div>
                 <div className={styles["water-tank"]}>
-                  <div className={styles["water-fill"]} />
+                  <div
+                    className={styles["water-fill"]}
+                    style={{
+                      height: `${readingZones.length ? Math.min(100, Number(water.replace(",", ".")) * 5) : 0}%`,
+                    }}
+                  />
                   <Icon name="drop" size={28} />
                 </div>
                 <div className={styles["water-reading"]}>
@@ -213,6 +218,6 @@ export function Dashboard() {
           </div>
         </>
       )}
-    </>
+    </div>
   );
 }

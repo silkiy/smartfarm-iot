@@ -6,6 +6,7 @@ import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useEffect, useState } from "react";
 import { requestJson } from "@/lib/api-client";
 import styles from "../notifications.module.css";
+import { cn } from "@/lib/cn";
 
 export function Notifications() {
   const { notices, markRead, preferences, savePreferences, busy } =
@@ -70,12 +71,16 @@ export function Notifications() {
         </button>
       </PageHeading>
       <div className={styles["notifications-layout"]}>
-        <section className="panel">
+        <section className={cn("panel", styles["notification-feed"])}>
           <div className="panel-title">
             <h2>Kabar dari lahan Anda</h2>
             <Badge tone="neutral">{unread.length} belum dibaca</Badge>
           </div>
-          <div className={styles["filter-tabs"]}>
+          <div
+            className={styles["filter-tabs"]}
+            role="group"
+            aria-label="Filter notifikasi"
+          >
             {["Semua", "Belum dibaca", "Peringatan", "Irigasi", "Sistem"].map(
               (f) => (
                 <button
@@ -95,13 +100,30 @@ export function Notifications() {
             />
           ) : (
             filtered.map((n) => (
-              <article className={styles["notice-item"]} key={n.id}>
-                <div>
+              <article
+                className={cn(
+                  styles["notice-item"],
+                  n.read && styles["notice-read"],
+                )}
+                key={n.id}
+              >
+                <div className={styles["notice-content"]}>
                   <h3>{n.title}</h3>
                   <p>{n.message}</p>
-                  <p className="muted">
-                    {n.category} · {n.time}
-                  </p>
+                  <div className={styles["notice-meta"]}>
+                    <span>{n.category}</span>
+                    <time dateTime={n.time}>
+                      {new Date(n.time).toLocaleString("id-ID", {
+                        timeZone: "Asia/Jakarta",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}{" "}
+                      WIB
+                    </time>
+                  </div>
                   {!n.read && (
                     <button
                       className="text-link"
@@ -116,7 +138,7 @@ export function Notifications() {
             ))
           )}
         </section>
-        <aside>
+        <aside className={styles["notifications-aside"]}>
           <section className="panel">
             <h2>Preferensi pemberitahuan</h2>
             <p>Disimpan untuk akun Anda.</p>
@@ -149,12 +171,12 @@ export function Notifications() {
                 </button>
               </div>
             ))}
-            <p className="muted">
+            <p className={styles["preference-note"]}>
               Preferensi WhatsApp belum mengaktifkan pengiriman. Kanal harus
               dikonfigurasi administrator terlebih dahulu.
             </p>
           </section>
-          <section className="panel">
+          <section className="panel form-stack">
             <h2>WhatsApp Cloud API</h2>
             <Badge tone="neutral">
               {integration?.whatsappReady
