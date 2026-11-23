@@ -8,8 +8,9 @@ import { useEffect, useState, type FormEvent } from "react";
 import type { Person } from "../types";
 import { UsersList } from "./users-list";
 import styles from "../users.module.css";
+
 export function UsersScreen() {
-  const { user, farms, zones, refresh, notify } = useWorkspace();
+  const { user, farms, refresh, notify } = useWorkspace();
   const [people, setPeople] = useState<Person[]>([]),
     [page, setPage] = useState(1),
     [total, setTotal] = useState(0);
@@ -18,10 +19,9 @@ export function UsersScreen() {
   );
   const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState(""),
-    [busy, setBusy] = useState(false),
-    [zoneId, setZoneId] = useState("");
+    [busy, setBusy] = useState(false);
+
   useEffect(() => {
-    if (user.role === "FIELD_WORKER") return;
     const controller = new AbortController();
     requestJson<{ items: Person[]; total: number }>(
       `/api/users?page=${page}`,
@@ -42,14 +42,8 @@ export function UsersScreen() {
         }
       });
     return () => controller.abort();
-  }, [user.role, page, attempt]);
-  if (user.role === "FIELD_WORKER")
-    return (
-      <section className="panel stack">
-        <h1>Akses terbatas</h1>
-        <p>Pengguna dan penugasan dikelola admin atau pemilik lahan.</p>
-      </section>
-    );
+  }, [page, attempt]);
+
   async function save(path: string, method: string, data: unknown) {
     setBusy(true);
     setError("");
@@ -76,6 +70,7 @@ export function UsersScreen() {
       setBusy(false);
     }
   }
+
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -84,13 +79,12 @@ export function UsersScreen() {
     )
       form.reset();
   }
-  const currentZone = zones.find((z) => z.id === zoneId) ?? zones[0];
-  const workers = people.filter((p) => p.role === "FIELD_WORKER" && p.isActive);
+
   return (
     <div className="page-stack">
       <PageHeading
-        title="Pengguna & penugasan"
-        description="Kelola akun dan tentukan zona yang dapat diakses pekerja."
+        title="Pengguna"
+        description="Kelola akun admin dan pemilik lahan."
       />
       {error && (
         <div className="info-banner" role="alert">
@@ -133,7 +127,6 @@ export function UsersScreen() {
                   <Field label="Peran pengguna">
                     <select name="role">
                       <option value="LANDOWNER">Pemilik lahan</option>
-                      <option value="FIELD_WORKER">Pekerja lapangan</option>
                       <option value="ADMIN">Admin</option>
                     </select>
                   </Field>
@@ -169,121 +162,45 @@ export function UsersScreen() {
             }
           />
         </div>
-        {(currentZone || (user.role === "ADMIN" && farms.length > 0)) && (
-          <aside className="stack" aria-label="Penugasan dan kepemilikan">
-            {currentZone && (
-              <section className="panel stack">
-                <h2>Penugasan pekerja</h2>
-                <Field label="Zona penugasan">
-                  <select
-                    value={currentZone.id}
-                    onChange={(e) => setZoneId(e.target.value)}
-                  >
-                    {zones.map((z) => (
-                      <option key={z.id} value={z.id}>
-                        {farms.find((f) => f.id === z.farmId)?.name} · {z.name}
+        {user.role === "ADMIN" && farms.length > 0 && (
+          <aside className="stack" aria-label="Kepemilikan lahan">
+            <section className="panel stack">
+              <h2>Kepemilikan lahan</h2>
+              <form
+                className="form-stack"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const data = new FormData(e.currentTarget);
+                  void save(`/api/farms/${data.get("farmId")}/owner`, "PUT", {
+                    ownerUserId: data.get("ownerUserId"),
+                  });
+                }}
+              >
+                <Field label="Lahan yang dialihkan">
+                  <select name="farmId">
+                    {farms.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.name}
                       </option>
                     ))}
                   </select>
                 </Field>
-                <form
-                  className="form-stack"
-                  key={currentZone.id + currentZone.assignedUserIds.join(",")}
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const data = new FormData(e.currentTarget);
-                    void save(
-                      `/api/zones/${currentZone.id}/assignments`,
-                      "PUT",
-                      {
-                        assignedUserIds: data.getAll("assigned"),
-                        controlUserIds: currentZone.controlUserIds.filter(
-                          (id) => data.getAll("assigned").includes(id),
-                        ),
-                      },
-                    );
-                  }}
-                >
-                  <p>
-                    Pekerja yang ditugaskan dapat melihat zona ini. Kendali
-                    perangkat belum tersedia.
-                  </p>
-                  {!workers.length && (
-                    <p>Belum ada pekerja aktif pada halaman ini.</p>
-                  )}
-                  <fieldset className={styles["worker-list"]}>
-                    <legend>Pekerja yang dapat mengakses zona</legend>
-                    {workers.map((p) => (
-                      <label key={p.userId} className={styles["worker-option"]}>
-                        <input
-                          type="checkbox"
-                          name="assigned"
-                          value={p.userId}
-                          defaultChecked={currentZone.assignedUserIds.includes(
-                            p.userId,
-                          )}
-                        />
-                        <span>
-                          <strong>{p.displayName}</strong>
-                          <small>{p.email}</small>
-                        </span>
-                      </label>
-                    ))}
-                  </fieldset>
-                  <button
-                    className="button button-primary"
-                    disabled={busy || total > 100}
-                  >
-                    Simpan penugasan
-                  </button>
-                  {total > 100 && (
-                    <p>
-                      Penugasan massal memerlukan daftar lengkap; saat ini
-                      dibatasi hingga 100 pengguna.
-                    </p>
-                  )}
-                </form>
-              </section>
-            )}
-            {user.role === "ADMIN" && farms.length > 0 && (
-              <section className="panel stack">
-                <h2>Kepemilikan lahan</h2>
-                <form
-                  className="form-stack"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const data = new FormData(e.currentTarget);
-                    void save(`/api/farms/${data.get("farmId")}/owner`, "PUT", {
-                      ownerUserId: data.get("ownerUserId"),
-                    });
-                  }}
-                >
-                  <Field label="Lahan yang dialihkan">
-                    <select name="farmId">
-                      {farms.map((f) => (
-                        <option key={f.id} value={f.id}>
-                          {f.name}
+                <Field label="Pemilik baru">
+                  <select name="ownerUserId" required>
+                    {people
+                      .filter((p) => p.isActive)
+                      .map((p) => (
+                        <option key={p.userId} value={p.userId}>
+                          {p.displayName}
                         </option>
                       ))}
-                    </select>
-                  </Field>
-                  <Field label="Pemilik baru">
-                    <select name="ownerUserId" required>
-                      {people
-                        .filter((p) => p.isActive && p.role !== "FIELD_WORKER")
-                        .map((p) => (
-                          <option key={p.userId} value={p.userId}>
-                            {p.displayName}
-                          </option>
-                        ))}
-                    </select>
-                  </Field>
-                  <button className="button button-primary" disabled={busy}>
-                    Simpan pemilik
-                  </button>
-                </form>
-              </section>
-            )}
+                  </select>
+                </Field>
+                <button className="button button-primary" disabled={busy}>
+                  Simpan pemilik
+                </button>
+              </form>
+            </section>
           </aside>
         )}
       </div>

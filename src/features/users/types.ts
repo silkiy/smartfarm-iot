@@ -11,5 +11,4 @@ export type Person = {
 export const personRoleLabels: Record<UserRole, string> = {
   ADMIN: "Admin",
   LANDOWNER: "Pemilik lahan",
-  FIELD_WORKER: "Pekerja lapangan",
 };

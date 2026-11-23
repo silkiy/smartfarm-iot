@@ -9,11 +9,10 @@ import { cn } from "@/lib/cn";
 import { useState, type FormEvent } from "react";
 
 export function RuleForm({ zoneId }: { zoneId: string }) {
-  const { rules, saveRule, role, busy } = useWorkspace();
+  const { rules, saveRule, busy } = useWorkspace();
   const [draft, setDraft] = useState<IrrigationRule>(
     rules[zoneId] ?? defaultRule,
   );
-  const readonly = role === "Pekerja lapangan";
   async function save(event: FormEvent) {
     event.preventDefault();
     await saveRule(zoneId, draft);
@@ -32,7 +31,7 @@ export function RuleForm({ zoneId }: { zoneId: string }) {
           aria-label="Aktifkan aturan otomatis"
           className={`switch${draft.enabled ? " switched" : ""}`}
           onClick={() => setDraft({ ...draft, enabled: !draft.enabled })}
-          disabled={readonly}
+          disabled={false}
         >
           <span />
         </button>
@@ -44,7 +43,7 @@ export function RuleForm({ zoneId }: { zoneId: string }) {
           perangkat dan kalibrasi.
         </p>
       </div>
-      <fieldset disabled={readonly || busy} className={styles["form-fieldset"]}>
+      <fieldset disabled={busy} className={styles["form-fieldset"]}>
         <Field label="Fase pertumbuhan">
           <select
             value={draft.phase}

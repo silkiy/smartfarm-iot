@@ -17,12 +17,7 @@ export default async function setup() {
     const db = client.db();
     await ensureDatabaseIndexes(db);
     const accounts = [];
-    for (const role of [
-      "ADMIN",
-      "LANDOWNER",
-      "LANDOWNER",
-      "FIELD_WORKER",
-    ] as const) {
+    for (const role of ["ADMIN", "LANDOWNER", "LANDOWNER"] as const) {
       const id = randomUUID(),
         email = `${id}@example.invalid`,
         password = randomUUID() + "Aa!";
@@ -40,8 +35,7 @@ export default async function setup() {
       await writeFile("test-results/accounts.json", JSON.stringify(accounts));
     }
     const farmId = new ObjectId(),
-      zoneId = new ObjectId(),
-      hiddenZoneId = new ObjectId();
+      zoneId = new ObjectId();
     await db.collection("farms").insertOne({
       _id: farmId,
       name: "Sawah pengujian",
@@ -52,28 +46,14 @@ export default async function setup() {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-    await db.collection("zones").insertMany([
-      {
-        _id: zoneId,
-        farmId,
-        name: "Zona ditugaskan",
-        isActive: true,
-        assignedUserIds: [accounts[3].userId],
-        controlUserIds: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        _id: hiddenZoneId,
-        farmId,
-        name: "Zona privat",
-        isActive: true,
-        assignedUserIds: [],
-        controlUserIds: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ]);
+    await db.collection("zones").insertOne({
+      _id: zoneId,
+      farmId,
+      name: "Zona pengujian",
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
     await db.collection("alerts").insertOne({
       farmId,
       zoneId,
@@ -89,7 +69,6 @@ export default async function setup() {
       JSON.stringify({
         farmId: farmId.toHexString(),
         zoneId: zoneId.toHexString(),
-        hiddenZoneId: hiddenZoneId.toHexString(),
       }),
     );
     await writeFile("test-results/accounts.json", JSON.stringify(accounts));

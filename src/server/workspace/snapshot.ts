@@ -80,8 +80,6 @@ export async function workspaceSnapshot(
       water: readingsByZone.get(z._id.toHexString())?.waterLevelCm ?? 0,
       online: false,
       hasReading: readingsByZone.has(z._id.toHexString()),
-      assignedUserIds: z.assignedUserIds,
-      controlUserIds: z.controlUserIds,
     })),
     rules: Object.fromEntries(
       rules.map((r) => [

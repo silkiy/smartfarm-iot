@@ -8,7 +8,6 @@ const base = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3120";
 async function resources(): Promise<{
   farmId: string;
   zoneId: string;
-  hiddenZoneId: string;
 }> {
   return JSON.parse(await readFile("test-results/resources.json", "utf8"));
 }
@@ -21,6 +20,7 @@ test.beforeEach(({ page }) => {
 test.afterEach(({ page }) => {
   expect(errors.get(page)).toEqual([]);
 });
+
 test("public root redirects before render and protected pages require login", async ({
   page,
   request,
@@ -33,6 +33,7 @@ test("public root redirects before render and protected pages require login", as
   await expect(page).toHaveURL(/\/login$/);
   expect((await request.get("/api/workspace")).status()).toBe(401);
 });
+
 test("login shows invalid credentials and accessible help", async ({
   page,
 }) => {
@@ -48,13 +49,14 @@ test("login shows invalid credentials and accessible help", async ({
     "tidak valid",
   );
 });
-test("API authorization isolates owners and workers", async ({
+
+test("API authorization isolates owners from other owners", async ({
   playwright,
 }) => {
-  const { farmId, zoneId, hiddenZoneId } = await resources();
+  const { farmId, zoneId } = await resources();
   const contexts = [];
   try {
-    for (const index of [1, 2, 3]) {
+    for (const index of [1, 2]) {
       const ctx = await playwright.request.newContext({
         baseURL: base,
         extraHTTPHeaders: { Origin: base },
@@ -62,14 +64,15 @@ test("API authorization isolates owners and workers", async ({
       await login(ctx, index);
       contexts.push(ctx);
     }
-    const [owner, other, worker] = contexts;
+    const [owner, other] = contexts;
     expect((await other.delete(`/api/farms/${farmId}`)).status()).toBe(403);
     expect(
       (
-        await worker.patch(`/api/zones/${zoneId}`, { data: { name: "Hijack" } })
+        await other.patch(`/api/zones/${zoneId}`, { data: { name: "Hijack" } })
       ).status(),
     ).toBe(403);
-    expect((await worker.get("/api/users")).status()).toBe(403);
+    // Owners cannot access the users list — only admins can
+    expect((await owner.get("/api/users")).status()).toBe(403);
     expect((await owner.post("/api/users", { data: {} })).status()).toBe(403);
     expect(
       (
@@ -97,22 +100,6 @@ test("API authorization isolates owners and workers", async ({
         })
       ).status(),
     ).toBe(200);
-    const state = (await (await worker.get("/api/workspace")).json()).data;
-    expect(state.zones.map((z: { id: string }) => z.id)).toContain(zoneId);
-    expect(state.zones.map((z: { id: string }) => z.id)).not.toContain(
-      hiddenZoneId,
-    );
-    expect(state.rules[zoneId].threshold).toBe(35);
-    const date = new Date().toLocaleDateString("en-CA", {
-      timeZone: "Asia/Jakarta",
-    });
-    expect(
-      (
-        await worker.get(
-          `/api/reports?farmId=${farmId}&zoneId=${hiddenZoneId}&from=${date}&to=${date}`,
-        )
-      ).status(),
-    ).toBe(403);
     expect(
       (
         await owner.post("/api/farms", {
@@ -125,12 +112,13 @@ test("API authorization isolates owners and workers", async ({
     await Promise.all(contexts.map((c) => c.dispose()));
   }
 });
+
 test("alert read state is persisted separately per account", async ({
   playwright,
 }) => {
   const contexts = [];
   try {
-    for (const i of [1, 3]) {
+    for (const i of [1, 2]) {
       const ctx = await playwright.request.newContext({
         baseURL: base,
         extraHTTPHeaders: { Origin: base },
@@ -138,27 +126,28 @@ test("alert read state is persisted separately per account", async ({
       await login(ctx, i);
       contexts.push(ctx);
     }
-    const [owner, worker] = contexts;
-    const notice = (await (await worker.get("/api/workspace")).json()).data
+    const [owner1, owner2] = contexts;
+    const notice = (await (await owner1.get("/api/workspace")).json()).data
       .notices[0];
     expect(notice).toBeTruthy();
     expect(
       (
-        await worker.patch("/api/notifications/read", {
+        await owner1.patch("/api/notifications/read", {
           data: { ids: [notice.id] },
         })
       ).status(),
     ).toBe(200);
     expect(
-      (await (await worker.get("/api/workspace")).json()).data.notices[0].read,
+      (await (await owner1.get("/api/workspace")).json()).data.notices[0].read,
     ).toBe(true);
     expect(
-      (await (await owner.get("/api/workspace")).json()).data.notices[0].read,
-    ).toBe(false);
+      (await (await owner2.get("/api/workspace")).json()).data.notices[0]?.read,
+    ).not.toBe(true);
   } finally {
     await Promise.all(contexts.map((c) => c.dispose()));
   }
 });
+
 test.describe("authenticated application", () => {
   test.beforeEach(async ({ request, context }) => {
     await login(request, 0);
@@ -170,7 +159,7 @@ test.describe("authenticated application", () => {
     analisis: "Grafik & laporan",
     notifikasi: "Notifikasi",
     lahan: "Lahan & sensor",
-    pengguna: "Pengguna & penugasan",
+    pengguna: "Pengguna",
   };
   for (const width of [320, 375, 768, 1024, 1440, 1920, 2560])
     for (const route of ["login", ...Object.keys(headings)])
@@ -186,6 +175,7 @@ test.describe("authenticated application", () => {
           await page.evaluate(() => document.documentElement.scrollWidth),
         ).toBeLessThanOrEqual(width);
       });
+
   test("profile actions keep space and Escape restores keyboard focus", async ({
     page,
   }) => {
@@ -207,24 +197,7 @@ test.describe("authenticated application", () => {
     await expect(dialog).toHaveCount(0);
     await expect(trigger).toBeFocused();
   });
-  test("worker checkboxes remain beside their labels on mobile and desktop", async ({
-    page,
-  }) => {
-    await page.goto("/pengguna");
-    const group = page.getByRole("group", {
-      name: "Pekerja yang dapat mengakses zona",
-    });
-    const option = group.locator("label").first();
-    await expect(option).toBeVisible();
-    for (const width of [320, 1440]) {
-      await page.setViewportSize({ width, height: 1000 });
-      const checkbox = await option.getByRole("checkbox").boundingBox();
-      const text = await option.locator("strong").boundingBox();
-      expect(text!.x - checkbox!.x - checkbox!.width).toBeGreaterThanOrEqual(8);
-      expect(text!.x - checkbox!.x - checkbox!.width).toBeLessThanOrEqual(24);
-      expect((await option.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    }
-  });
+
   test("farm and zone CRUD survives reload and rules persist", async ({
     page,
   }) => {
@@ -288,6 +261,7 @@ test.describe("authenticated application", () => {
       0,
     );
   });
+
   test("notification preferences survive reload and hardware is absent", async ({
     page,
   }) => {
@@ -313,7 +287,8 @@ test.describe("authenticated application", () => {
       page.getByRole("heading", { name: "Belum ada pembacaan sensor" }),
     ).toBeVisible();
   });
-  test("admin creates a user with nine characters and deactivation invalidates their existing session", async ({
+
+  test("admin creates a landowner account and deactivation invalidates the session", async ({
     request,
     playwright,
   }) => {
@@ -324,8 +299,8 @@ test.describe("authenticated application", () => {
       data: {
         email,
         password: password.slice(0, 8),
-        displayName: "Pengguna pengujian",
-        role: "FIELD_WORKER",
+        displayName: "Pemilik pengujian",
+        role: "LANDOWNER",
       },
     });
     expect(rejected.status()).toBe(422);
@@ -334,14 +309,14 @@ test.describe("authenticated application", () => {
       data: {
         email,
         password,
-        displayName: "Pengguna pengujian",
-        role: "FIELD_WORKER",
+        displayName: "Pemilik pengujian",
+        role: "LANDOWNER",
       },
     });
     expect(response.status()).toBe(201);
     const id = (await response.json()).data.id;
     const accounts = await readAccounts();
-    accounts.push({ userId: id, email, password, role: "FIELD_WORKER" });
+    accounts.push({ userId: id, email, password, role: "LANDOWNER" });
     await writeFile("test-results/accounts.json", JSON.stringify(accounts));
     const ctx = await playwright.request.newContext({
       baseURL: base,
@@ -371,6 +346,7 @@ test.describe("authenticated application", () => {
       await ctx.dispose();
     }
   });
+
   test("password reset revokes an existing session and new credentials can sign in", async ({
     request,
     playwright,
@@ -383,13 +359,13 @@ test.describe("authenticated application", () => {
         email,
         password,
         displayName: "Reset audit",
-        role: "FIELD_WORKER",
+        role: "LANDOWNER",
       },
     });
     expect(response.status()).toBe(201);
     const id = (await response.json()).data.id;
     const accounts = await readAccounts();
-    accounts.push({ userId: id, email, password, role: "FIELD_WORKER" });
+    accounts.push({ userId: id, email, password, role: "LANDOWNER" });
     await writeFile("test-results/accounts.json", JSON.stringify(accounts));
     const ctx = await playwright.request.newContext({
       baseURL: base,
@@ -429,6 +405,7 @@ test.describe("authenticated application", () => {
       await fresh.dispose();
     }
   });
+
   test("list endpoints reject invalid page numbers", async ({ request }) => {
     for (const path of ["/api/users", "/api/farms"]) {
       for (const page of ["Infinity", "1.5", "-1", "abc", "100001"]) {
@@ -436,14 +413,15 @@ test.describe("authenticated application", () => {
       }
     }
   });
-  test("farm edits, ownership transfer and assignment removal enforce current access", async ({
+
+  test("farm edits and ownership transfer enforce current access", async ({
     request,
     playwright,
   }) => {
     const accounts = await readAccounts();
     const contexts: APIRequestContext[] = [];
     try {
-      for (const index of [1, 2, 3]) {
+      for (const index of [1, 2]) {
         const ctx = await playwright.request.newContext({
           baseURL: base,
           extraHTTPHeaders: { Origin: base },
@@ -451,7 +429,7 @@ test.describe("authenticated application", () => {
         await login(ctx, index);
         contexts.push(ctx);
       }
-      const [owner, other, worker] = contexts;
+      const [owner, other] = contexts;
       const fields = {
         name: "Transfer audit",
         location: "Lamongan",
@@ -489,25 +467,6 @@ test.describe("authenticated application", () => {
       ).toBe("Zona diperbarui");
       expect(
         (
-          await owner.put(`/api/zones/${zoneId}/assignments`, {
-            data: { assignedUserIds: [], controlUserIds: [accounts[3].userId] },
-          })
-        ).status(),
-      ).toBe(422);
-      expect(
-        (
-          await owner.put(`/api/zones/${zoneId}/assignments`, {
-            data: { assignedUserIds: [accounts[3].userId], controlUserIds: [] },
-          })
-        ).status(),
-      ).toBe(200);
-      expect(
-        (await (await worker.get("/api/workspace")).json()).data.zones.map(
-          (z: { id: string }) => z.id,
-        ),
-      ).toContain(zoneId);
-      expect(
-        (
           await request.put(`/api/farms/${farmId}/owner`, {
             headers: { Origin: base },
             data: { ownerUserId: accounts[2].userId },
@@ -520,18 +479,6 @@ test.describe("authenticated application", () => {
       expect(
         (await other.patch(`/api/farms/${farmId}`, { data: fields })).status(),
       ).toBe(200);
-      expect(
-        (
-          await other.put(`/api/zones/${zoneId}/assignments`, {
-            data: { assignedUserIds: [], controlUserIds: [] },
-          })
-        ).status(),
-      ).toBe(200);
-      expect(
-        (await (await worker.get("/api/workspace")).json()).data.zones.map(
-          (z: { id: string }) => z.id,
-        ),
-      ).not.toContain(zoneId);
       expect((await other.delete(`/api/zones/${zoneId}`)).status()).toBe(200);
       expect(
         (
@@ -552,6 +499,7 @@ test.describe("authenticated application", () => {
       await Promise.all(contexts.map((ctx) => ctx.dispose()));
     }
   });
+
   test("API rejects malformed requests and provider tests remain disabled", async ({
     request,
   }) => {
@@ -607,6 +555,7 @@ test.describe("authenticated application", () => {
     expect(cookie?.httpOnly).toBe(true);
     expect(cookie?.sameSite).toBe("Lax");
   });
+
   test("reports and dashboard use existing database measurements without device execution", async ({
     request,
     page,
@@ -659,7 +608,6 @@ test.describe("authenticated application", () => {
       const csv = await readFile(file!, "utf8");
       expect(csv).toContain('"TERSIMPAN"');
       expect(csv).toContain('"69","6.5"');
-      expect(csv).toContain('"Zona ditugaskan"');
       await page.goto("/dashboard");
       await page.getByLabel("Pilih lahan").selectOption(farmId);
       await expect(
@@ -677,6 +625,7 @@ test.describe("authenticated application", () => {
       await client.close();
     }
   });
+
   test("successful user creation is not reported as failed when list refresh fails", async ({
     page,
   }) => {
@@ -719,6 +668,7 @@ test.describe("authenticated application", () => {
       "tersimpan",
     );
   });
+
   test("logout revokes browser session", async ({ page }) => {
     await page.goto("/dashboard");
     await page

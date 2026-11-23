@@ -14,8 +14,6 @@ export async function POST(
       ...fields,
       farmId: farm._id,
       isActive: true,
-      assignedUserIds: [],
-      controlUserIds: [],
       createdAt: now,
       updatedAt: now,
     });

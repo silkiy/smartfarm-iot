@@ -50,20 +50,14 @@ export function createDummyData({
       commandId = objectId(`device_commands-${i}`),
       alertId = objectId(`alerts-${i}`);
     const time = new Date(now.getTime() - (10 - i) * 60_000);
-    const role = i === 0 ? "ADMIN" : i <= 5 ? "LANDOWNER" : "FIELD_WORKER";
-    const ownerUserId = ids[1 + (i % 5)],
-      workerUserId = ids[6 + (i % 4)];
+    const role = i === 0 ? "ADMIN" : "LANDOWNER";
+    const ownerUserId = ids[1 + (i % 5)];
     const phase = ["Vegetatif", "Generatif", "Pematangan"][i % 3];
     add("profiles", i, {
       userId: ids[i],
       email:
-        i === 0
-          ? adminEmail
-          : `${i <= 5 ? "pemilik" : "pekerja"}${String(i <= 5 ? i : i - 5).padStart(2, "0")}@dummy.com`,
-      displayName:
-        i === 0
-          ? "Silki (Admin Dummy)"
-          : `Dummy ${i <= 5 ? "Pemilik" : "Pekerja"} ${n}`,
+        i === 0 ? adminEmail : `pemilik${String(i).padStart(2, "0")}@dummy.com`,
+      displayName: i === 0 ? "Silki (Admin Dummy)" : `Dummy Pemilik ${n}`,
       role,
       isActive: true,
       passwordHash,
@@ -84,8 +78,6 @@ export function createDummyData({
       name: `Dummy Petak ${n}`,
       growthPhase: phase,
       isActive: true,
-      assignedUserIds: [workerUserId],
-      controlUserIds: [],
     });
     add("devices", i, {
       deviceId: `dummy-esp32-${n}`,

@@ -18,7 +18,7 @@ export const collectionNames = {
 export type CollectionName =
   (typeof collectionNames)[keyof typeof collectionNames];
 
-export type UserRole = "ADMIN" | "LANDOWNER" | "FIELD_WORKER";
+export type UserRole = "ADMIN" | "LANDOWNER";
 export type DeviceStatus = "ONLINE" | "OFFLINE" | "DISABLED";
 export type ActuatorStatus = "ON" | "OFF" | "OPEN" | "CLOSED";
 export type CommandStatus = "PENDING" | "RECEIVED" | "EXECUTED" | "FAILED";
@@ -59,8 +59,6 @@ export interface ZoneDocument extends BaseDocument {
   name: string;
   growthPhase?: string;
   isActive: boolean;
-  assignedUserIds: string[];
-  controlUserIds: string[];
   archivedAt?: Date;
 }
 

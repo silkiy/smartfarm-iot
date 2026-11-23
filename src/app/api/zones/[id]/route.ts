@@ -5,7 +5,7 @@ type Context = { params: Promise<{ id: string }> };
 export async function PATCH(request: Request, context: Context) {
   return api(request, async (user, db) => {
     const { id } = await context.params;
-    const { zone } = await zoneAccess(db, user, id, true);
+    const { zone } = await zoneAccess(db, user, id);
     const fields = await input(request, zoneInputSchema);
     await db
       .collection("zones")
@@ -19,7 +19,7 @@ export async function PATCH(request: Request, context: Context) {
 export async function DELETE(request: Request, context: Context) {
   return api(request, async (user, db) => {
     const { id } = await context.params;
-    const { zone } = await zoneAccess(db, user, id, true);
+    const { zone } = await zoneAccess(db, user, id);
     await db.collection("zones").updateOne(
       { _id: zone._id },
       {

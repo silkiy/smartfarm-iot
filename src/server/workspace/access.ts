@@ -16,12 +16,8 @@ export async function farmAccess(db: Db, user: AuthenticatedUser, id: string) {
   assertFarmAccess(user, farm);
   return farm;
 }
-export async function zoneAccess(
-  db: Db,
-  user: AuthenticatedUser,
-  id: string,
-  manage = false,
-) {
+
+export async function zoneAccess(db: Db, user: AuthenticatedUser, id: string) {
   const zone = await db.collection<ZoneDocument>("zones").findOne({
     _id: objectId(id),
     isActive: true,
@@ -33,28 +29,12 @@ export async function zoneAccess(
     .findOne({ _id: zone.farmId, archivedAt: { $exists: false } });
   if (!farm)
     throw new ApiError(404, "FARM_NOT_FOUND", "Lahan tidak ditemukan.");
-  if (manage) assertFarmAccess(user, farm);
-  else assertZoneAccess(user, farm, zone, "READ");
+  assertZoneAccess(user, farm);
   return { zone, farm };
 }
+
 export async function visibleResources(db: Db, user: AuthenticatedUser) {
-  const assigned =
-    user.role === "FIELD_WORKER"
-      ? await db
-          .collection<ZoneDocument>("zones")
-          .find({
-            assignedUserIds: user.id,
-            isActive: true,
-            archivedAt: { $exists: false },
-          })
-          .toArray()
-      : [];
-  const ownerFilter =
-    user.role === "ADMIN"
-      ? {}
-      : user.role === "LANDOWNER"
-        ? { ownerUserId: user.id }
-        : { _id: { $in: assigned.map((z) => z.farmId) } };
+  const ownerFilter = user.role === "ADMIN" ? {} : { ownerUserId: user.id };
   const farms = await db
     .collection<FarmDocument>("farms")
     .find({ ...ownerFilter, archivedAt: { $exists: false } })
@@ -66,7 +46,6 @@ export async function visibleResources(db: Db, user: AuthenticatedUser) {
       farmId: { $in: farms.map((f) => f._id) },
       isActive: true,
       archivedAt: { $exists: false },
-      ...(user.role === "FIELD_WORKER" ? { assignedUserIds: user.id } : {}),
     })
     .sort({ createdAt: 1 })
     .toArray();

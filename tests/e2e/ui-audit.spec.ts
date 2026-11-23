@@ -16,13 +16,13 @@ const headings: Record<string, string> = {
   irigasi: "Kontrol irigasi",
   analisis: "Grafik & laporan",
   notifikasi: "Notifikasi",
-  pengguna: "Pengguna & penugasan",
+  pengguna: "Pengguna",
 };
-async function ready(page: Page, route: string, worker = false) {
+async function ready(page: Page, route: string) {
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: route === "pengguna" && worker ? "Akses terbatas" : headings[route],
+      name: headings[route],
       exact: true,
     }),
   ).toBeVisible();
@@ -67,7 +67,6 @@ async function dialogFits(page: Page) {
 for (const [index, role] of [
   [0, "admin"],
   [1, "owner"],
-  [3, "worker"],
 ] as const)
   for (const width of [320, 768, 1440])
     test(`${role}: every page fits ${width}px and exposes usable actions`, async ({
@@ -82,11 +81,11 @@ for (const [index, role] of [
       page.on("pageerror", (e) => errors.push(e.message));
       for (const route of routes) {
         await page.goto(`/${route}`);
-        await ready(page, route, role === "worker");
+        await ready(page, route);
         if (route === "lahan") {
           await expect(
             page.getByRole("button", { name: "Tambah lahan", exact: true }),
-          ).toHaveCount(role === "worker" ? 0 : 1);
+          ).toHaveCount(1);
         }
         if (route === "pengguna") {
           await expect(
@@ -100,8 +99,7 @@ for (const [index, role] of [
           const control = page.getByRole("switch", {
             name: "Aktifkan aturan otomatis",
           });
-          if (role === "worker") await expect(control).toBeDisabled();
-          else await expect(control).toBeEnabled();
+          await expect(control).toBeEnabled();
         }
         await fits(page);
         const small = await page

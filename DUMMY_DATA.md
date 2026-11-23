@@ -1,6 +1,6 @@
 # Data dummy aplikasi
 
-Dataset pengembangan berisi **120 dokumen: 10 pada setiap kategori** berikut.
+Dataset pengembangan berisi **60 dokumen: 10 pada setiap kategori** berikut.
 
 | Kategori          | Collection MongoDB  | Jumlah |
 | ----------------- | ------------------- | ------ |
@@ -17,19 +17,18 @@ Dataset pengembangan berisi **120 dokumen: 10 pada setiap kategori** berikut.
 | Log notifikasi    | `notification_logs` | 10     |
 | Contoh cuaca      | `weather_records`   | 10     |
 
-Relasi lahan, zona, pemilik, pekerja, perangkat dan riwayat memakai ID yang saling terhubung. Jumlah ini menghitung dokumen dengan `seedBatch: "smartfarm-dummy-v1"`; data lain yang sudah ada tetap dipertahankan. Collection teknis seperti `auth_attempts` bukan kategori dummy.
+Relasi lahan, zona, pemilik, perangkat dan riwayat memakai ID yang saling terhubung. Jumlah ini menghitung dokumen dengan `seedBatch: "smartfarm-dummy-v1"`; data lain yang sudah ada tetap dipertahankan. Collection teknis seperti `auth_attempts` bukan kategori dummy.
 
 ## Akun
 
-| Peran            | Email                                              | Jumlah |
-| ---------------- | -------------------------------------------------- | ------ |
-| Admin            | `silki@dummy.com`                                  | 1      |
-| Pemilik lahan    | `pemilik01@dummy.com` sampai `pemilik05@dummy.com` | 5      |
-| Pekerja lapangan | `pekerja01@dummy.com` sampai `pekerja04@dummy.com` | 4      |
+| Peran         | Email                                              | Jumlah |
+| ------------- | -------------------------------------------------- | ------ |
+| Admin         | `silki@dummy.com`                                  | 1      |
+| Pemilik lahan | `pemilik01@dummy.com` sampai `pemilik09@dummy.com` | 9      |
 
 Pada pembuatan awal, seluruh akun memakai kata sandi yang diberikan melalui `DUMMY_SEED_PASSWORD`. Kata sandi disimpan sebagai hash bcrypt; nilainya tidak ditanamkan dalam kode. Kebijakan login, pembuatan akun, bootstrap admin dan reset kata sandi sama: minimal **9 karakter**, maksimal **72 byte UTF-8**.
 
-Admin melihat seluruh lahan. Setiap pemilik memiliki dua lahan; pekerja hanya melihat petak yang ditugaskan kepadanya. Akun dummy tetap memakai login dan pemeriksaan hak akses yang sama dengan akun lainnya.
+Admin melihat seluruh lahan. Setiap pemilik memiliki dua lahan. Akun dummy tetap memakai login dan pemeriksaan hak akses yang sama dengan akun lainnya.
 
 ## Menjalankan seeder
 

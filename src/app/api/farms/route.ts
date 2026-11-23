@@ -19,7 +19,8 @@ export async function GET(request: Request) {
 }
 export async function POST(request: Request) {
   return api(request, async (user, db) => {
-    if (user.role === "FIELD_WORKER") throw new AuthorizationError();
+    if (user.role !== "ADMIN" && user.role !== "LANDOWNER")
+      throw new AuthorizationError();
     const fields = await input(request, farmInputSchema);
     const now = new Date();
     const result = await db.collection("farms").insertOne({

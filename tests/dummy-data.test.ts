@@ -20,7 +20,6 @@ test("dummy dataset has ten records per category with stable relationships", () 
   for (const farm of data.farms) assert.ok(users.has(farm.ownerUserId));
   for (const zone of data.zones) {
     assert.ok(farms.has(String(zone.farmId)));
-    assert.ok(zone.assignedUserIds.every((id: string) => users.has(id)));
   }
   for (const row of data.sensor_readings) {
     assert.ok(farms.has(row.farmId));

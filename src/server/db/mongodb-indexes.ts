@@ -19,12 +19,6 @@ export async function ensureDatabaseIndexes(database: Db): Promise<void> {
       .collection(collectionNames.zones)
       .createIndex({ farmId: 1, isActive: 1 }, { name: "zones_farm_active" }),
     database
-      .collection(collectionNames.zones)
-      .createIndex(
-        { assignedUserIds: 1, isActive: 1 },
-        { name: "zones_worker_active" },
-      ),
-    database
       .collection(collectionNames.irrigationRules)
       .createIndex({ zoneId: 1 }, { unique: true, name: "rules_zone_unique" }),
     database

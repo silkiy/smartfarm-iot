@@ -7,7 +7,7 @@ export async function PUT(
 ) {
   return api(request, async (user, db) => {
     const { id } = await context.params;
-    const { zone } = await zoneAccess(db, user, id, true);
+    const { zone } = await zoneAccess(db, user, id);
     const rule = await input(request, ruleInputSchema);
     await db.collection("irrigation_rules").updateOne(
       { zoneId: zone._id },

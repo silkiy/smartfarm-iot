@@ -1,60 +1,43 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  assertFarmAccess,
   assertZoneAccess,
   AuthorizationError,
 } from "../src/server/auth/policy";
 
 const farm = { ownerUserId: "owner-1" };
-const zone = {
-  assignedUserIds: ["worker-1", "worker-controller"],
-  controlUserIds: ["worker-controller"],
-};
 
 describe("authorization policy", () => {
-  it("allows admins and farm owners to read their resources", () => {
+  it("allows admins to access any farm", () => {
     assert.doesNotThrow(() =>
-      assertZoneAccess({ id: "admin", role: "ADMIN" }, farm, zone, "READ"),
-    );
-    assert.doesNotThrow(() =>
-      assertZoneAccess(
-        { id: "owner-1", role: "LANDOWNER" },
-        farm,
-        zone,
-        "READ",
-      ),
+      assertFarmAccess({ id: "admin", role: "ADMIN" }, farm),
     );
   });
 
-  it("allows assigned workers to read but not control by default", () => {
+  it("allows farm owners to access their own farm", () => {
     assert.doesNotThrow(() =>
-      assertZoneAccess(
-        { id: "worker-1", role: "FIELD_WORKER" },
-        farm,
-        zone,
-        "READ",
-      ),
+      assertFarmAccess({ id: "owner-1", role: "LANDOWNER" }, farm),
     );
+  });
+
+  it("denies owners from accessing farms they do not own", () => {
     assert.throws(
-      () =>
-        assertZoneAccess(
-          { id: "worker-1", role: "FIELD_WORKER" },
-          farm,
-          zone,
-          "CONTROL",
-        ),
+      () => assertFarmAccess({ id: "other", role: "LANDOWNER" }, farm),
       AuthorizationError,
     );
   });
 
-  it("allows control only for explicitly permitted workers", () => {
+  it("assertZoneAccess delegates to assertFarmAccess", () => {
     assert.doesNotThrow(() =>
-      assertZoneAccess(
-        { id: "worker-controller", role: "FIELD_WORKER" },
-        farm,
-        zone,
-        "CONTROL",
-      ),
+      assertZoneAccess({ id: "admin", role: "ADMIN" }, farm),
+    );
+    assert.doesNotThrow(() =>
+      assertZoneAccess({ id: "owner-1", role: "LANDOWNER" }, farm),
+    );
+    assert.throws(
+      () => assertZoneAccess({ id: "other", role: "LANDOWNER" }, farm),
+      AuthorizationError,
     );
   });
 });

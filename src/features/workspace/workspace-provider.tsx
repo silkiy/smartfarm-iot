@@ -109,11 +109,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     ? farmSelection
     : (data.farms[0]?.id ?? "");
   const role: WorkspaceRole =
-    data.user.role === "ADMIN"
-      ? "Admin"
-      : data.user.role === "LANDOWNER"
-        ? "Pemilik lahan"
-        : "Pekerja lapangan";
+    data.user.role === "ADMIN" ? "Admin" : "Pemilik lahan";
   return (
     <Context.Provider
       value={{

@@ -1,11 +1,9 @@
-import type { FarmDocument, UserRole, ZoneDocument } from "@/domain/models";
+import type { FarmDocument, UserRole } from "@/domain/models";
 
 export interface AuthenticatedUser {
   id: string;
   role: UserRole;
 }
-
-export type ZoneAction = "READ" | "CONTROL";
 
 export class AuthorizationError extends Error {
   readonly code = "FORBIDDEN";
@@ -34,26 +32,6 @@ export function assertFarmAccess(
 export function assertZoneAccess(
   user: AuthenticatedUser,
   farm: Pick<FarmDocument, "ownerUserId">,
-  zone: Pick<ZoneDocument, "assignedUserIds" | "controlUserIds">,
-  action: ZoneAction,
 ): void {
-  if (user.role === "ADMIN") {
-    return;
-  }
-
-  if (user.role === "LANDOWNER" && farm.ownerUserId === user.id) {
-    return;
-  }
-
-  const isAssigned = zone.assignedUserIds.includes(user.id);
-  const canControl = zone.controlUserIds.includes(user.id);
-  if (
-    user.role === "FIELD_WORKER" &&
-    isAssigned &&
-    (action === "READ" || canControl)
-  ) {
-    return;
-  }
-
-  throw new AuthorizationError();
+  assertFarmAccess(user, farm);
 }

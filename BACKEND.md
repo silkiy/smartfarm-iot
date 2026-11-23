@@ -8,16 +8,15 @@ Aplikasi memakai Next.js Route Handlers, Auth.js Credentials/JWT dan MongoDB. Ha
 2. Isi `AUTH_SECRET` dengan nilai acak yang kuat. Konfigurasi lokal saat implementasi sudah dibuat di `.env.local` yang diabaikan Git. Untuk lingkungan baru, jalankan `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"` lalu simpan hasilnya ke environment server.
 3. Jalankan `npm run bootstrap:admin`. Masukkan email, nama, dan kata sandi minimal 9 karakter. Isian kata sandi tidak ditampilkan. CLI juga menerima `ADMIN_BOOTSTRAP_*` jika diperlukan. Akun yang sudah ada tidak ditimpa, dan ID akun tidak diubah. Hapus variabel kata sandi bootstrap sesudah digunakan.
 4. Jalankan `npm run dev`, buka `/login`, lalu masuk menggunakan akun tersebut.
-5. Buka profil → **Pengguna & penugasan** untuk membuat pemilik/pekerja, mengatur kepemilikan lahan dan penugasan zona. Admin membuat akun; registrasi publik tidak tersedia.
+5. Buka profil → **Pengguna** untuk membuat pemilik lahan, mengatur kepemilikan lahan. Admin membuat akun; registrasi publik tidak tersedia.
 
 `npm run bootstrap:admin` juga menyiapkan indeks unik email/userId, aturan per zona, indeks pencarian, dan TTL pembatas percobaan login. Maksimal 10 percobaan dalam jendela 15 menit per email; respons gagal tidak membedakan akun yang tidak ada dan sandi salah. Login berhasil menghapus hitungan jendela tersebut. Password bcrypt dibatasi hingga 72 byte.
 
 ## Akses
 
-- Admin: semua lahan/zona, akun baru, aktivasi/nonaktivasi pengguna selain admin, pemilik lahan, penugasan, dan uji WhatsApp.
-- Pemilik: lahan sendiri, zona dan aturan pada lahan sendiri, serta penugasan pekerja aktif.
-- Pekerja: hanya zona yang ditugaskan dan lahan induknya. Tidak dapat mengubah lahan/zona/aturan/pengguna.
-- Preferensi dan status baca notifikasi disimpan per akun. Nonaktivasi akun diperiksa ulang di database pada setiap permintaan API, termasuk sesi yang masih memiliki JWT.
+- Admin: semua lahan/zona, akun baru, aktivasi/nonaktivasi pengguna selain admin, pemilik lahan, dan uji WhatsApp.
+- Pemilik: lahan sendiri, zona dan aturan pada lahan sendiri.
+- Nonaktivasi akun diperiksa ulang di database pada setiap permintaan API, termasuk sesi yang masih memiliki JWT.
 - Reset kata sandi dan penonaktifan menaikkan `sessionVersion` secara atomik. Sesi lama ditolak setelah reset maupun setelah akun diaktifkan kembali; pengguna harus masuk ulang. Profil/JWT lama tanpa versi diperlakukan sebagai versi 0.
 - Penghapusan lahan/zona mengarsipkan data. Riwayat dipertahankan, sementara semua query aktif memeriksa induk yang belum diarsipkan.
 
@@ -34,7 +33,6 @@ Mutation API mewajibkan sesi aktif dan Origin yang cocok; endpoint yang menerima
 | `POST /api/farms/:id/zones`                                            | Tambah zona                                                                                                      |
 | `PATCH/DELETE /api/zones/:id`                                          | Ubah / arsipkan zona                                                                                             |
 | `PUT /api/zones/:id/rule`                                              | Simpan rancangan aturan; status `AWAITING_HARDWARE`                                                              |
-| `PUT /api/zones/:id/assignments`                                       | Penugasan pekerja aktif; izin kontrol harus subset penugasan                                                     |
 | `PUT /api/farms/:id/owner`                                             | Admin mengalihkan lahan kepada pemilik/admin aktif                                                               |
 | `GET/POST /api/users`                                                  | Daftar berhalaman / tambah akun oleh admin                                                                       |
 | `PATCH /api/users/:id`                                                 | Admin menonaktifkan/mengaktifkan akun selain admin atau mengatur ulang sandi                                     |

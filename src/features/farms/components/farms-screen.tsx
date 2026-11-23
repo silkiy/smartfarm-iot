@@ -12,10 +12,9 @@ import { FarmDialogs } from "./farm-dialogs";
 
 import type { FarmEditor } from "../types";
 export function Farms() {
-  const { farms, zones, role } = useWorkspace();
+  const { farms, zones } = useWorkspace();
   const [editor, setEditor] = useState<FarmEditor>(null);
   const [search, setSearch] = useState("");
-  const readonly = role === "Pekerja lapangan";
   const filtered = farms.filter((farm) =>
     `${farm.name} ${farm.location}`
       .toLocaleLowerCase("id-ID")
@@ -28,15 +27,13 @@ export function Farms() {
         title="Lahan & sensor"
         description="Kelola lahan, petak, dan perangkat dari satu tempat."
       >
-        {!readonly && (
-          <button
-            className="button button-primary"
-            onClick={() => setEditor({ type: "farm" })}
-          >
-            <Icon name="plus" size={17} />
-            Tambah lahan
-          </button>
-        )}
+        <button
+          className="button button-primary"
+          onClick={() => setEditor({ type: "farm" })}
+        >
+          <Icon name="plus" size={17} />
+          Tambah lahan
+        </button>
       </PageHeading>
       <div className={styles["farm-summary-row"]}>
         <div>
@@ -74,9 +71,7 @@ export function Farms() {
             onChange={(event) => setSearch(event.target.value)}
           />
         </label>
-        <Badge tone="neutral">
-          {readonly ? "Akses pemantauan" : "Pengelolaan lahan"}
-        </Badge>
+        <Badge tone="neutral">Pengelolaan lahan</Badge>
       </div>
       {filtered.length === 0 ? (
         <section className="panel">
@@ -92,7 +87,7 @@ export function Farms() {
                 : "Coba nama atau lokasi lain untuk menemukan lahan."
             }
           >
-            {farms.length === 0 && !readonly ? (
+            {farms.length === 0 ? (
               <button
                 className="button button-primary"
                 onClick={() => setEditor({ type: "farm" })}

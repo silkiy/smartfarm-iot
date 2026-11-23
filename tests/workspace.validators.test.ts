@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  assignmentSchema,
   farmInputSchema,
   ruleInputSchema,
   userInputSchema,
@@ -28,6 +27,7 @@ test("farm validates numeric area, paired coordinates, and rejects ownership inj
     false,
   );
 });
+
 test("rule rejects invalid schedules and values instead of silently clamping", () => {
   const input = {
     enabled: true,
@@ -48,11 +48,15 @@ test("rule rejects invalid schedules and values instead of silently clamping", (
     );
   }
 });
-test("assignments require control users to be assigned, new accounts validate roles/passwords", () => {
-  const id = "8d2b2752-bb0f-4a97-889f-54558397bc56";
+
+test("new accounts reject FIELD_WORKER role and short passwords", () => {
   assert.equal(
-    assignmentSchema.safeParse({ assignedUserIds: [], controlUserIds: [id] })
-      .success,
+    userInputSchema.safeParse({
+      email: "user@example.com",
+      displayName: "Owner",
+      password: "123456789",
+      role: "FIELD_WORKER",
+    }).success,
     false,
   );
   assert.equal(
@@ -63,5 +67,14 @@ test("assignments require control users to be assigned, new accounts validate ro
       role: "ADMIN",
     }).success,
     false,
+  );
+  assert.equal(
+    userInputSchema.safeParse({
+      email: "user@example.com",
+      displayName: "Owner",
+      password: "123456789",
+      role: "LANDOWNER",
+    }).success,
+    true,
   );
 });

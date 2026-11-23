@@ -168,15 +168,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <p>{role}</p>
           </div>
           <div className={styles["profile-actions"]}>
-            {user.role !== "FIELD_WORKER" && (
-              <Link
-                className="button button-secondary full-width"
-                href="/pengguna"
-                onClick={() => setProfileOpen(false)}
-              >
-                Pengguna & penugasan
-              </Link>
-            )}
+            <Link
+              className="button button-secondary full-width"
+              href="/pengguna"
+              onClick={() => setProfileOpen(false)}
+            >
+              Pengguna & penugasan
+            </Link>
             <button
               className="button button-primary full-width"
               onClick={() => signOut({ redirectTo: "/login" })}

@@ -24,18 +24,6 @@ export const zoneInputSchema = z
     name: z.string().trim().min(1).max(60),
   })
   .strict();
-export const assignmentSchema = z
-  .object({
-    assignedUserIds: z.array(z.string().uuid()).max(50),
-    controlUserIds: z.array(z.string().uuid()).max(50),
-  })
-  .strict()
-  .refine(
-    (v) => v.controlUserIds.every((id) => v.assignedUserIds.includes(id)),
-    {
-      message: "Izin kontrol hanya untuk pekerja yang ditugaskan.",
-    },
-  );
 export const ruleInputSchema = z
   .object({
     enabled: z.boolean(),
@@ -53,7 +41,7 @@ export const userInputSchema = z
     email: z.string().trim().toLowerCase().email().max(254),
     displayName: z.string().trim().min(1).max(80),
     password: passwordSchema,
-    role: z.enum(["ADMIN", "LANDOWNER", "FIELD_WORKER"]),
+    role: z.enum(["ADMIN", "LANDOWNER"]),
   })
   .strict();
 export type FarmInput = z.infer<typeof farmInputSchema>;

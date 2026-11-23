@@ -1,5 +1,5 @@
 import type { UserRole } from "@/domain/models";
-export type WorkspaceRole = "Pemilik lahan" | "Admin" | "Pekerja lapangan";
+export type WorkspaceRole = "Pemilik lahan" | "Admin";
 export type Farm = {
   isDemo?: boolean;
   id: string;
@@ -19,8 +19,6 @@ export type Zone = {
   water: number;
   online: boolean;
   hasReading: boolean;
-  assignedUserIds: string[];
-  controlUserIds: string[];
 };
 export type Notice = {
   id: string;

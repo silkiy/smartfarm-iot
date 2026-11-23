@@ -16,8 +16,7 @@ export function FarmCard({
   farmIndex: number;
   setEditor: (editor: FarmEditor) => void;
 }) {
-  const { zones, role, farmId, setFarmId, notify } = useWorkspace();
-  const readonly = role === "Pekerja lapangan";
+  const { zones, farmId, setFarmId, notify } = useWorkspace();
   const farmZones = zones.filter((zone) => zone.farmId === farm.id);
   return (
     <section
@@ -44,24 +43,22 @@ export function FarmCard({
             <Icon name="leaf" size={14} />
             {farm.phase}
           </span>
-          {!readonly && (
-            <div className={styles["photo-actions"]}>
-              <button
-                className="icon-button"
-                aria-label={`Ubah ${farm.name}`}
-                onClick={() => setEditor({ type: "farm", farm })}
-              >
-                <Icon name="edit" size={16} />
-              </button>
-              <button
-                className="icon-button"
-                aria-label={`Hapus ${farm.name}`}
-                onClick={() => setEditor({ type: "delete-farm", farm })}
-              >
-                <Icon name="trash" size={16} />
-              </button>
-            </div>
-          )}
+          <div className={styles["photo-actions"]}>
+            <button
+              className="icon-button"
+              aria-label={`Ubah ${farm.name}`}
+              onClick={() => setEditor({ type: "farm", farm })}
+            >
+              <Icon name="edit" size={16} />
+            </button>
+            <button
+              className="icon-button"
+              aria-label={`Hapus ${farm.name}`}
+              onClick={() => setEditor({ type: "delete-farm", farm })}
+            >
+              <Icon name="trash" size={16} />
+            </button>
+          </div>
         </div>
         <div className={styles["farm-photo-title"]}>
           <p>
@@ -77,15 +74,13 @@ export function FarmCard({
       <div className={styles["farm-card-body"]}>
         <div className="panel-title">
           <h3>Zona pemantauan</h3>
-          {!readonly && (
-            <button
-              className="text-link"
-              onClick={() => setEditor({ type: "zone", farmId: farm.id })}
-            >
-              <Icon name="plus" size={15} />
-              Tambah zona
-            </button>
-          )}
+          <button
+            className="text-link"
+            onClick={() => setEditor({ type: "zone", farmId: farm.id })}
+          >
+            <Icon name="plus" size={15} />
+            Tambah zona
+          </button>
         </div>
         {farmZones.length === 0 ? (
           <div className={styles["zone-empty"]}>
@@ -128,30 +123,26 @@ export function FarmCard({
                   >
                     <Icon name="sensor" size={16} />
                   </button>
-                  {!readonly && (
-                    <>
-                      <button
-                        className="icon-button"
-                        aria-label={`Ubah ${zone.name}`}
-                        onClick={() =>
-                          setEditor({
-                            type: "zone",
-                            farmId: farm.id,
-                            zone,
-                          })
-                        }
-                      >
-                        <Icon name="edit" size={16} />
-                      </button>
-                      <button
-                        className="icon-button"
-                        aria-label={`Hapus ${zone.name}`}
-                        onClick={() => setEditor({ type: "delete-zone", zone })}
-                      >
-                        <Icon name="trash" size={16} />
-                      </button>
-                    </>
-                  )}
+                  <button
+                    className="icon-button"
+                    aria-label={`Ubah ${zone.name}`}
+                    onClick={() =>
+                      setEditor({
+                        type: "zone",
+                        farmId: farm.id,
+                        zone,
+                      })
+                    }
+                  >
+                    <Icon name="edit" size={16} />
+                  </button>
+                  <button
+                    className="icon-button"
+                    aria-label={`Hapus ${zone.name}`}
+                    onClick={() => setEditor({ type: "delete-zone", zone })}
+                  >
+                    <Icon name="trash" size={16} />
+                  </button>
                 </div>
               </div>
             ))}
@@ -160,7 +151,7 @@ export function FarmCard({
         <div className={styles["farm-card-footer"]}>
           <span className="muted">
             <Icon name="shield" size={14} />
-            {readonly ? "Pemantauan zona" : "Lahan terdaftar"}
+            Lahan terdaftar
           </span>
           <button
             className="text-link"
