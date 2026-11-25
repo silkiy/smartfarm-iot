@@ -20,5 +20,6 @@ export type FarmEditor =
   | {
       type: "device";
       zone: Zone;
+      farm: Farm;
     }
   | null;

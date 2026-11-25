@@ -1,10 +1,9 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
 import { Dialog } from "@/components/ui/dialog";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import type { Farm, Zone } from "@/features/workspace/types";
 import type { FarmEditor } from "../types";
-import { FarmForm, ZoneForm } from "./farm-forms";
+import { FarmForm, ZoneForm, DeviceForm } from "./farm-forms";
 import { useState } from "react";
 export function FarmDialogs({
   editor,
@@ -100,38 +99,7 @@ export function FarmDialogs({
         </Dialog>
       )}
       {editor?.type === "device" && (
-        <Dialog title={`Perangkat ${editor.zone.name}`} onClose={close}>
-          <Badge tone={editor.zone.online ? "green" : "neutral"}>
-            {editor.zone.online
-              ? "Perangkat aktif"
-              : "Terputus / belum terhubung"}
-          </Badge>
-          <div className="dialog-summary">
-            <div>
-              <span>Pengendali</span>
-              <strong>Belum terdaftar</strong>
-            </div>
-            <div>
-              <span>Sensor tanah</span>
-              <strong>Kelembapan (%)</strong>
-            </div>
-            <div>
-              <span>Sensor air</span>
-              <strong>Ketinggian (cm)</strong>
-            </div>
-            <div>
-              <span>Aktuator</span>
-              <strong>Pompa & katup</strong>
-            </div>
-          </div>
-          <p>
-            Rincian ini merupakan ilustrasi kebutuhan perangkat. Pendaftaran
-            perangkat dan kalibrasi belum terhubung ke layanan IoT.
-          </p>
-          <button className="button button-primary full-width" onClick={close}>
-            Tutup rincian
-          </button>
-        </Dialog>
+        <DeviceForm farm={editor.farm} zone={editor.zone} onClose={close} />
       )}
     </>
   );

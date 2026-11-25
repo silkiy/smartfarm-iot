@@ -119,7 +119,7 @@ export function FarmCard({
                   <button
                     className="icon-button"
                     aria-label={`Lihat perangkat ${zone.name}`}
-                    onClick={() => setEditor({ type: "device", zone })}
+                    onClick={() => setEditor({ type: "device", zone, farm })}
                   >
                     <Icon name="sensor" size={16} />
                   </button>

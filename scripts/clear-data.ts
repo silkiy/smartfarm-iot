@@ -9,7 +9,10 @@
  *   npx tsx scripts/clear-data.ts
  */
 import { loadEnvConfig } from "@next/env";
-import { getMongoClientPromise, getMongoDatabase } from "../src/server/db/mongodb";
+import {
+  getMongoClientPromise,
+  getMongoDatabase,
+} from "../src/server/db/mongodb";
 import { collectionNames } from "../src/domain/models";
 
 async function main() {
@@ -17,7 +20,9 @@ async function main() {
 
   const keepEmail = (process.env.KEEP_ADMIN_EMAIL ?? "").trim().toLowerCase();
   if (!keepEmail) {
-    console.error("Set KEEP_ADMIN_EMAIL ke email admin yang ingin dipertahankan.");
+    console.error(
+      "Set KEEP_ADMIN_EMAIL ke email admin yang ingin dipertahankan.",
+    );
     process.exitCode = 1;
     return;
   }
@@ -65,7 +70,9 @@ async function main() {
   const profileResult = await db
     .collection("profiles")
     .deleteMany({ email: { $ne: keepEmail } });
-  console.log(`  profiles: hapus ${profileResult.deletedCount} dokumen (admin dipertahankan)`);
+  console.log(
+    `  profiles: hapus ${profileResult.deletedCount} dokumen (admin dipertahankan)`,
+  );
 
   // Pastikan akun admin masih ACTIVE dan role benar
   await db.collection("profiles").updateOne(
@@ -83,7 +90,9 @@ async function main() {
 
   console.log("\nSelesai. Database bersih, akun admin dipertahankan.");
   console.log(`Email : ${admin.email}`);
-  console.log("Langkah selanjutnya: login dan daftarkan lahan/zona/device baru.");
+  console.log(
+    "Langkah selanjutnya: login dan daftarkan lahan/zona/device baru.",
+  );
 }
 
 void main()
