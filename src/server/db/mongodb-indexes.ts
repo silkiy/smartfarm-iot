@@ -66,5 +66,19 @@ export async function ensureDatabaseIndexes(database: Db): Promise<void> {
         { farmId: 1, fetchedAt: -1 },
         { name: "weather_farm_fetched_at" },
       ),
+    // Index untuk polling perintah PENDING oleh ESP32
+    database
+      .collection(collectionNames.deviceCommands)
+      .createIndex(
+        { status: 1, createdAt: 1 },
+        { name: "commands_status_time" },
+      ),
+    // Index untuk requestId idempotency ingest
+    database
+      .collection(collectionNames.sensorReadings)
+      .createIndex(
+        { requestId: 1 },
+        { unique: true, name: "readings_request_id_unique" },
+      ),
   ]);
 }
