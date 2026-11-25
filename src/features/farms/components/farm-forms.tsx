@@ -225,7 +225,7 @@ export function ZoneForm({
   );
 }
 
-type DeviceStep = "form" | "key";
+type DeviceStep = "form" | "done";
 
 export function DeviceForm({
   farm,
@@ -238,8 +238,7 @@ export function DeviceForm({
 }) {
   const formId = useId();
   const [step, setStep] = useState<DeviceStep>("form");
-  const [apiKey, setApiKey] = useState("");
-  const [deviceId, setDeviceId] = useState("");
+  const [registeredId, setRegisteredId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -249,19 +248,18 @@ export function DeviceForm({
     setBusy(true);
     const form = new FormData(event.currentTarget);
     try {
-      const result = await requestJson<{ deviceId: string; apiKey: string }>(
-        "/api/devices",
-        "POST",
-        {
-          deviceId: String(form.get("deviceId")).trim(),
-          name: String(form.get("name")).trim(),
-          farmId: farm.id,
-          zoneId: zone.id,
-        },
-      );
-      setDeviceId(result.deviceId);
-      setApiKey(result.apiKey);
-      setStep("key");
+      const result = await requestJson<{
+        deviceId: string;
+        macAddress: string;
+      }>("/api/devices", "POST", {
+        macAddress: String(form.get("macAddress")).trim().toUpperCase(),
+        deviceId: String(form.get("deviceId")).trim(),
+        name: String(form.get("name")).trim(),
+        farmId: farm.id,
+        zoneId: zone.id,
+      });
+      setRegisteredId(result.deviceId);
+      setStep("done");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Pendaftaran gagal.");
     } finally {
@@ -269,11 +267,7 @@ export function DeviceForm({
     }
   }
 
-  async function copyKey() {
-    await navigator.clipboard.writeText(apiKey);
-  }
-
-  if (step === "key") {
+  if (step === "done") {
     return (
       <Dialog
         title="Perangkat terdaftar"
@@ -289,31 +283,10 @@ export function DeviceForm({
         <div className="info-banner">
           <Icon name="info" size={18} />
           <p>
-            Salin API key ini sekarang —{" "}
-            <strong>tidak akan ditampilkan lagi</strong>. Simpan ke firmware
-            ESP32 Anda.
+            <strong>{registeredId}</strong> berhasil didaftarkan. Nyalakan ESP32
+            — perangkat akan otomatis aktif setelah terhubung ke WiFi.
           </p>
         </div>
-        <Field label="Device ID">
-          <input readOnly value={deviceId} />
-        </Field>
-        <Field label="API Key (salin sekarang)">
-          <div style={{ display: "flex", gap: 8 }}>
-            <input
-              readOnly
-              value={apiKey}
-              style={{ fontFamily: "monospace", fontSize: 12, flex: 1 }}
-            />
-            <button
-              type="button"
-              className="button button-secondary"
-              onClick={copyKey}
-              aria-label="Salin API key"
-            >
-              <Icon name="check" size={16} />
-            </button>
-          </div>
-        </Field>
         <Field label="Lahan">
           <input readOnly value={farm.name} />
         </Field>
@@ -349,8 +322,8 @@ export function DeviceForm({
       }
     >
       <p>
-        Daftarkan ESP32 untuk zona <strong>{zone.name}</strong>. API key akan
-        muncul sekali setelah pendaftaran — simpan ke firmware.
+        Daftarkan ESP32 untuk zona <strong>{zone.name}</strong>. Setelah
+        terdaftar, ESP32 akan otomatis aktif tanpa perlu ubah firmware.
       </p>
       <form id={formId} onSubmit={submit} className="form-stack">
         {error && (
@@ -358,6 +331,20 @@ export function DeviceForm({
             {error}
           </div>
         )}
+        <Field
+          label="MAC Address ESP32"
+          hint="Lihat di Serial Monitor saat ESP32 pertama nyala. Format: AA:BB:CC:DD:EE:FF"
+        >
+          <input
+            name="macAddress"
+            required
+            maxLength={17}
+            placeholder="AA:BB:CC:DD:EE:FF"
+            pattern="^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$"
+            title="Format MAC address: AA:BB:CC:DD:EE:FF"
+            style={{ fontFamily: "monospace" }}
+          />
+        </Field>
         <Field
           label="Device ID"
           hint="Nama unik perangkat, contoh: ESP32-SAWAH-01"

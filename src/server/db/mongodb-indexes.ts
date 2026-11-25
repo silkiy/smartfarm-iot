@@ -43,6 +43,12 @@ export async function ensureDatabaseIndexes(database: Db): Promise<void> {
         { unique: true, name: "devices_device_id_unique" },
       ),
     database
+      .collection(collectionNames.devices)
+      .createIndex(
+        { macAddress: 1 },
+        { unique: true, name: "devices_mac_unique" },
+      ),
+    database
       .collection(collectionNames.sensorReadings)
       .createIndex(
         { deviceId: 1, measuredAt: -1 },

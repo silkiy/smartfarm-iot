@@ -63,13 +63,17 @@ export interface ZoneDocument extends BaseDocument {
 }
 
 export interface DeviceDocument extends BaseDocument {
+  /** MAC address ESP32, format AA:BB:CC:DD:EE:FF — identitas unik hardware */
+  macAddress: string;
+  /** deviceId yang diisi admin saat registrasi, contoh: ESP32-SAWAH-01 */
   deviceId: string;
   farmId: ObjectId;
   zoneId: ObjectId;
   name: string;
   status: DeviceStatus;
   lastSeenAt?: Date;
-  credentialHash: string;
+  /** SHA-256 dari DEVICE_FLEET_KEY — membuktikan device bagian dari fleet ini */
+  fleetKeyHash: string;
 }
 
 export interface SensorDocument extends BaseDocument {

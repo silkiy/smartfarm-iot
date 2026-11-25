@@ -1,14 +1,14 @@
 import { deviceRegistrationSchema } from "@/domain/device";
 import { collectionNames } from "@/domain/models";
 import { AuthorizationError } from "@/server/auth/policy";
-import { generateDeviceKey } from "@/server/auth/device";
+import { getFleetKeyHash } from "@/server/auth/device";
 import { api, input, json, objectId } from "@/server/http/api";
 import { farmAccess } from "@/server/workspace/access";
 
 /**
  * POST /api/devices
- * Admin atau pemilik lahan mendaftarkan ESP32 baru.
- * Response berisi apiKey plaintext — hanya muncul sekali, simpan ke ESP32.
+ * Admin atau pemilik lahan mendaftarkan ESP32 baru via MAC address.
+ * Tidak ada API key per device — semua ESP32 pakai DEVICE_FLEET_KEY.
  */
 export async function POST(request: Request) {
   return api(request, async (user, db) => {
@@ -33,22 +33,31 @@ export async function POST(request: Request) {
         { status: 404 },
       );
 
-    const { plaintext, hash } = generateDeviceKey();
+    // Pastikan DEVICE_FLEET_KEY sudah dikonfigurasi sebelum registrasi
+    const fleetKeyHash = getFleetKeyHash();
     const now = new Date();
 
     await db.collection(collectionNames.devices).insertOne({
+      macAddress: fields.macAddress,
       deviceId: fields.deviceId,
       farmId: objectId(fields.farmId),
       zoneId: objectId(fields.zoneId),
       name: fields.name,
       status: "OFFLINE" as const,
-      credentialHash: hash,
+      fleetKeyHash,
       createdAt: now,
       updatedAt: now,
     });
 
-    // apiKey hanya dikembalikan sekali — tidak disimpan plaintext di DB
-    return json({ deviceId: fields.deviceId, apiKey: plaintext }, 201);
+    return json(
+      {
+        deviceId: fields.deviceId,
+        macAddress: fields.macAddress,
+        message:
+          "Device terdaftar. Nyalakan ESP32 — akan otomatis aktif setelah terhubung WiFi.",
+      },
+      201,
+    );
   });
 }
 
@@ -75,7 +84,7 @@ export async function GET(request: Request) {
       .collection(collectionNames.devices)
       .find(filter, {
         projection: {
-          credentialHash: 0, // jangan pernah expose hash ke browser
+          fleetKeyHash: 0, // jangan expose hash ke browser
         },
       })
       .sort({ createdAt: -1 })
@@ -84,6 +93,7 @@ export async function GET(request: Request) {
     return json(
       devices.map((d) => ({
         id: d._id.toHexString(),
+        macAddress: d.macAddress,
         deviceId: d.deviceId,
         name: d.name,
         status: d.status,

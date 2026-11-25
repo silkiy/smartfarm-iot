@@ -1,17 +1,27 @@
 /**
- * smartfarm.ino
- * Firmware SmartFarm IoT — ESP32 DevKit V1
+ * smartfarm.ino — SmartFarm IoT Firmware
+ * ESP32 DevKit V1 | Versi: 2.0.0
+ *
+ * Desain: satu firmware untuk semua ESP32 di fleet.
+ * Identitas device (deviceId, farmId, zoneId) diambil dari server
+ * menggunakan MAC address — tidak perlu ubah kode per device.
  *
  * Sensor:
- *   - Kelembapan tanah kapasitif V1.2 → GPIO34 (ADC1)
+ *   - Kelembapan tanah kapasitif V1.2 → GPIO34 (ADC1_CH6)
  *   - Ultrasonik HC-SR04              → TRIG: GPIO5, ECHO: GPIO18
- *     (ECHO melalui voltage divider 1kΩ / 2kΩ karena output 5V)
+ *     ECHO diturunkan dari 5V ke 3.3V via voltage divider (1kΩ / 2kΩ)
  *
  * Alur:
  *   1. Sambung WiFi
- *   2. Baca kedua sensor
- *   3. POST ke /api/devices/ingest setiap SEND_INTERVAL_MS
- *   4. GET ke /api/devices/commands setiap SEND_INTERVAL_MS (siap untuk pompa)
+ *   2. Tampilkan MAC address di Serial Monitor
+ *   3. Provision: POST /api/devices/provision → dapat deviceId, farmId, zoneId
+ *      - Jika belum terdaftar di dashboard → tunggu 30 detik, coba lagi
+ *      - Jika dinonaktifkan admin → tunggu 60 detik, coba lagi
+ *   4. Loop: baca sensor → kirim ingest → poll perintah (tiap 10 detik)
+ *   5. Jika WiFi putus → reconnect otomatis sebelum kirim data
+ *
+ * Konfigurasi: hanya config.h yang perlu diisi (WiFi + API_BASE_URL + FLEET_KEY)
+ * Firmware ini sama untuk semua ESP32 dalam satu deployment.
  */
 
 #include <WiFi.h>
@@ -20,121 +30,229 @@
 #include <ArduinoJson.h>
 #include "config.h"
 
-// ── Pin ──────────────────────────────────────────────────────────────────────
-#define PIN_SOIL_MOISTURE  34   // ADC1_CH6 — sensor kelembapan (analog)
-#define PIN_TRIG           5    // HC-SR04 trigger
-#define PIN_ECHO           18   // HC-SR04 echo (via voltage divider)
+// ── Pin ───────────────────────────────────────────────────────────────────────
+static const int PIN_SOIL  = 34;  // ADC1_CH6 — sensor kelembapan (analog)
+static const int PIN_TRIG  = 5;   // HC-SR04 trigger
+static const int PIN_ECHO  = 18;  // HC-SR04 echo (via voltage divider)
 
-// ── Kalibrasi sensor kelembapan ──────────────────────────────────────────────
-// Ukur nilai ADC saat sensor di udara kering dan saat terendam air penuh,
-// lalu sesuaikan dua konstanta ini.
-#define SOIL_DRY_ADC    3200    // nilai ADC saat sensor di udara (0% kelembapan)
-#define SOIL_WET_ADC     800    // nilai ADC saat sensor terendam air (100%)
+// ── Kalibrasi sensor kelembapan ───────────────────────────────────────────────
+// Setelah wiring selesai:
+//   1. Biarkan sensor di udara → catat nilai ADC → isi SOIL_DRY_ADC
+//   2. Celupkan sensor ke air  → catat nilai ADC → isi SOIL_WET_ADC
+static const int SOIL_DRY_ADC = 3200;  // ADC saat sensor di udara kering (~0%)
+static const int SOIL_WET_ADC =  800;  // ADC saat sensor terendam air (~100%)
 
-// ── State pompa & katup (diperbarui dari respons command) ────────────────────
-static String pumpStatus  = "OFF";
-static String valveStatus = "CLOSED";
+// ── Timing ────────────────────────────────────────────────────────────────────
+static const unsigned long SEND_INTERVAL_MS    = 10000;  // kirim data tiap 10 detik
+static const unsigned long PROVISION_RETRY_MS  = 30000;  // retry provision tiap 30 detik
+static const unsigned long DISABLED_RETRY_MS   = 60000;  // retry jika disabled tiap 60 detik
+static const unsigned long WIFI_TIMEOUT_MS     = 15000;  // timeout koneksi WiFi 15 detik
+static const int           WIFI_MAX_RETRY      = 3;      // max retry WiFi sebelum restart
 
-// ── Fungsi baca sensor kelembapan ────────────────────────────────────────────
+// ── State global ──────────────────────────────────────────────────────────────
+static String g_macAddress  = "";
+static String g_deviceId    = "";
+static String g_farmId      = "";
+static String g_zoneId      = "";
+static String g_pumpStatus  = "OFF";
+static String g_valveStatus = "CLOSED";
+static bool   g_provisioned = false;
+
+// ── Deklarasi fungsi ──────────────────────────────────────────────────────────
+bool  connectWiFi();
+bool  provision();
+float readSoilMoisture();
+float readWaterLevelCm();
+String generateUUID();
+bool  sendSensorData(float soil, float water);
+void  pollCommands();
+void  sendCommandAck(const String& commandId, const String& status);
+void  makeSecureClient(WiFiClientSecure& client);
+
+// ── WiFi ──────────────────────────────────────────────────────────────────────
+bool connectWiFi() {
+  if (WiFi.status() == WL_CONNECTED) return true;
+
+  Serial.printf("[WIFI] Menyambung ke %s", WIFI_SSID);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  unsigned long start = millis();
+  while (WiFi.status() != WL_CONNECTED) {
+    if (millis() - start > WIFI_TIMEOUT_MS) {
+      Serial.println("\n[WIFI] Timeout.");
+      return false;
+    }
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.printf("\n[WIFI] Terhubung. IP: %s\n", WiFi.localIP().toString().c_str());
+  return true;
+}
+
+// ── Provisioning ──────────────────────────────────────────────────────────────
+bool provision() {
+  WiFiClientSecure client;
+  makeSecureClient(client);
+
+  HTTPClient http;
+  String url = String(API_BASE_URL) + "/api/devices/provision";
+  http.begin(client, url);
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("X-Fleet-Key", FLEET_KEY);
+
+  JsonDocument doc;
+  doc["macAddress"] = g_macAddress;
+  String body;
+  serializeJson(doc, body);
+
+  int code = http.POST(body);
+  String resp = http.getString();
+  http.end();
+
+  if (code == 200) {
+    JsonDocument res;
+    if (deserializeJson(res, resp) == DeserializationError::Ok) {
+      g_deviceId = res["data"]["deviceId"].as<String>();
+      g_farmId   = res["data"]["farmId"].as<String>();
+      g_zoneId   = res["data"]["zoneId"].as<String>();
+      Serial.printf("[PROV] OK — deviceId: %s\n", g_deviceId.c_str());
+      return true;
+    }
+  }
+
+  if (code == 403) {
+    JsonDocument res;
+    deserializeJson(res, resp);
+    String errCode = res["error"]["code"].as<String>();
+    if (errCode == "DEVICE_DISABLED") {
+      Serial.println("[PROV] Device dinonaktifkan admin. Tunggu 60 detik...");
+      delay(DISABLED_RETRY_MS);
+    } else {
+      Serial.println("[PROV] Belum terdaftar. Daftarkan MAC di dashboard, tunggu 30 detik...");
+      delay(PROVISION_RETRY_MS);
+    }
+  } else {
+    Serial.printf("[PROV] Error HTTP %d. Tunggu 30 detik...\n", code);
+    delay(PROVISION_RETRY_MS);
+  }
+  return false;
+}
+
+// ── Sensor kelembapan ─────────────────────────────────────────────────────────
 float readSoilMoisture() {
-  // Rata-rata 10 sampel untuk kurangi noise ADC
   long sum = 0;
   for (int i = 0; i < 10; i++) {
-    sum += analogRead(PIN_SOIL_MOISTURE);
+    sum += analogRead(PIN_SOIL);
     delay(5);
   }
-  int raw = sum / 10;
+  int raw = (int)(sum / 10);
 
-  // Map: DRY_ADC → 0%, WET_ADC → 100%, clamp ke 0–100
-  float pct = (float)(SOIL_DRY_ADC - raw) / (SOIL_DRY_ADC - SOIL_WET_ADC) * 100.0;
-  if (pct < 0.0)   pct = 0.0;
-  if (pct > 100.0) pct = 100.0;
+  float pct = (float)(SOIL_DRY_ADC - raw) /
+              (float)(SOIL_DRY_ADC - SOIL_WET_ADC) * 100.0f;
+  if (pct < 0.0f)   pct = 0.0f;
+  if (pct > 100.0f) pct = 100.0f;
   return pct;
 }
 
-// ── Fungsi baca HC-SR04 ───────────────────────────────────────────────────────
+// ── Sensor HC-SR04 ────────────────────────────────────────────────────────────
 float readWaterLevelCm() {
-  // Kirim pulsa 10µs
   digitalWrite(PIN_TRIG, LOW);
   delayMicroseconds(2);
   digitalWrite(PIN_TRIG, HIGH);
   delayMicroseconds(10);
   digitalWrite(PIN_TRIG, LOW);
 
-  // Ukur durasi echo (timeout 30ms = ~500cm)
-  long duration = pulseIn(PIN_ECHO, HIGH, 30000);
-  if (duration == 0) return -1.0;   // timeout / sensor tidak terhubung
+  long duration = pulseIn(PIN_ECHO, HIGH, 30000UL);
+  if (duration == 0) return -1.0f;  // timeout — sensor tidak terhubung
 
-  // Rumus: jarak (cm) = durasi (µs) / 58
-  float distanceCm = duration / 58.0;
-
-  // Clamp ke 0–100 cm
-  if (distanceCm < 0.0)   distanceCm = 0.0;
-  if (distanceCm > 100.0) distanceCm = 100.0;
-  return distanceCm;
+  float cm = (float)duration / 58.0f;
+  if (cm < 0.0f)   cm = 0.0f;
+  if (cm > 100.0f) cm = 100.0f;
+  return cm;
 }
 
-// ── Generate UUID v4 sederhana ────────────────────────────────────────────────
+// ── UUID v4 ───────────────────────────────────────────────────────────────────
 String generateUUID() {
+  uint32_t r[4] = {
+    esp_random(), esp_random(), esp_random(), esp_random()
+  };
+  // Set version 4 dan variant bits
+  r[1] = (r[1] & 0xFFFF0FFFUL) | 0x00004000UL;
+  r[2] = (r[2] & 0x3FFFFFFFUL) | 0x80000000UL;
+
   char buf[37];
   snprintf(buf, sizeof(buf),
-    "%08lx-%04lx-4%03lx-%04lx-%012llx",
-    (unsigned long)esp_random(),
-    (unsigned long)(esp_random() & 0xFFFF),
-    (unsigned long)(esp_random() & 0x0FFF),
-    (unsigned long)((esp_random() & 0x3FFF) | 0x8000),
-    ((unsigned long long)esp_random() << 32) | esp_random()
+    "%08lx-%04lx-%04lx-%04lx-%04lx%08lx",
+    (unsigned long)r[0],
+    (unsigned long)(r[1] >> 16),
+    (unsigned long)(r[1] & 0xFFFF),
+    (unsigned long)(r[2] >> 16),
+    (unsigned long)(r[2] & 0xFFFF),
+    (unsigned long)r[3]
   );
   return String(buf);
 }
 
-// ── Kirim data sensor ke backend ─────────────────────────────────────────────
-void sendSensorData(float soilMoisture, float waterLevel) {
-  if (WiFi.status() != WL_CONNECTED) return;
+// ── HTTPS client helper ───────────────────────────────────────────────────────
+void makeSecureClient(WiFiClientSecure& client) {
+  // Prototipe: skip verifikasi sertifikat.
+  // Produksi: ganti dengan client.setCACert(ROOT_CA) untuk pinning.
+  client.setInsecure();
+}
+
+// ── Kirim data sensor ─────────────────────────────────────────────────────────
+bool sendSensorData(float soil, float water) {
+  if (!connectWiFi()) return false;
 
   WiFiClientSecure client;
-  client.setInsecure();   // skip verifikasi sertifikat (prototipe)
+  makeSecureClient(client);
 
   HTTPClient http;
-  String url = String(API_BASE_URL) + "/api/devices/ingest";
-  http.begin(client, url);
+  http.begin(client, String(API_BASE_URL) + "/api/devices/ingest");
   http.addHeader("Content-Type", "application/json");
-  http.addHeader("X-Device-Key", API_KEY);
+  http.addHeader("X-Fleet-Key",   FLEET_KEY);
+  http.addHeader("X-Mac-Address", g_macAddress);
 
   JsonDocument doc;
-  doc["deviceId"]     = DEVICE_ID;
-  doc["soilMoisture"] = round(soilMoisture * 10) / 10.0;
-  doc["waterLevelCm"] = round(waterLevel * 10) / 10.0;
-  doc["pumpStatus"]   = pumpStatus;
-  doc["valveStatus"]  = valveStatus;
+  doc["macAddress"]   = g_macAddress;
+  doc["soilMoisture"] = (float)(round(soil  * 10) / 10.0);
+  doc["waterLevelCm"] = (float)(round(water * 10) / 10.0);
+  doc["pumpStatus"]   = g_pumpStatus;
+  doc["valveStatus"]  = g_valveStatus;
   doc["requestId"]    = generateUUID();
 
   String body;
   serializeJson(doc, body);
 
   int code = http.POST(body);
-  if (code > 0) {
-    Serial.printf("[INGEST] HTTP %d\n", code);
-    if (code != 200) {
-      Serial.println(http.getString());
-    }
+  if (code == 200) {
+    Serial.printf("[INGEST] OK — soil: %.1f%% water: %.1f cm\n", soil, water);
+    return true;
+  }
+
+  if (code == 403) {
+    // Device dinonaktifkan atau dicabut — perlu provision ulang
+    Serial.println("[INGEST] 403 — provision ulang...");
+    g_provisioned = false;
   } else {
-    Serial.printf("[INGEST] Error: %s\n", http.errorToString(code).c_str());
+    Serial.printf("[INGEST] Error HTTP %d\n", code);
   }
   http.end();
+  return false;
 }
 
-// ── Poll perintah dari backend ────────────────────────────────────────────────
+// ── Poll perintah ─────────────────────────────────────────────────────────────
 void pollCommands() {
-  if (WiFi.status() != WL_CONNECTED) return;
+  if (!connectWiFi()) return;
 
   WiFiClientSecure client;
-  client.setInsecure();
+  makeSecureClient(client);
 
   HTTPClient http;
-  String url = String(API_BASE_URL) + "/api/devices/commands";
-  http.begin(client, url);
-  http.addHeader("X-Device-Key", API_KEY);
+  http.begin(client, String(API_BASE_URL) + "/api/devices/commands");
+  http.addHeader("X-Fleet-Key",   FLEET_KEY);
+  http.addHeader("X-Mac-Address", g_macAddress);
 
   int code = http.GET();
   if (code == 200) {
@@ -150,28 +268,30 @@ void pollCommands() {
         Serial.printf("[CMD] %s → %s %s\n",
           commandId.c_str(), actuator.c_str(), action.c_str());
 
-        // Update status lokal (eksekusi fisik menunggu relay/pompa)
-        if (actuator == "PUMP")  pumpStatus  = action;
-        if (actuator == "VALVE") valveStatus = action;
+        // Update status lokal
+        if (actuator == "PUMP")  g_pumpStatus  = action;
+        if (actuator == "VALVE") g_valveStatus = action;
 
-        // Kirim ACK ke backend
         sendCommandAck(commandId, "EXECUTED");
       }
     }
+  } else if (code == 403) {
+    Serial.println("[CMD] 403 — provision ulang...");
+    g_provisioned = false;
   }
   http.end();
 }
 
-// ── Kirim ACK perintah ────────────────────────────────────────────────────────
+// ── ACK perintah ──────────────────────────────────────────────────────────────
 void sendCommandAck(const String& commandId, const String& status) {
   WiFiClientSecure client;
-  client.setInsecure();
+  makeSecureClient(client);
 
   HTTPClient http;
-  String url = String(API_BASE_URL) + "/api/devices/commands";
-  http.begin(client, url);
+  http.begin(client, String(API_BASE_URL) + "/api/devices/commands");
   http.addHeader("Content-Type", "application/json");
-  http.addHeader("X-Device-Key", API_KEY);
+  http.addHeader("X-Fleet-Key",   FLEET_KEY);
+  http.addHeader("X-Mac-Address", g_macAddress);
 
   JsonDocument doc;
   doc["commandId"] = commandId;
@@ -179,7 +299,6 @@ void sendCommandAck(const String& commandId, const String& status) {
 
   String body;
   serializeJson(doc, body);
-
   http.PATCH(body);
   http.end();
 }
@@ -187,53 +306,58 @@ void sendCommandAck(const String& commandId, const String& status) {
 // ── Setup ─────────────────────────────────────────────────────────────────────
 void setup() {
   Serial.begin(115200);
-  delay(500);
+  delay(1000);
 
   pinMode(PIN_TRIG, OUTPUT);
   pinMode(PIN_ECHO, INPUT);
-  analogReadResolution(12);   // ADC 12-bit (0–4095)
+  analogReadResolution(12);  // ADC 12-bit (0–4095)
+  digitalWrite(PIN_TRIG, LOW);
 
-  Serial.println("\n=== SmartFarm IoT ===");
-  Serial.printf("Device ID : %s\n", DEVICE_ID);
-  Serial.printf("Target    : %s\n", API_BASE_URL);
+  // Baca MAC address dari chip — tidak bisa dipalsukan
+  g_macAddress = WiFi.macAddress();
+  // WiFi.macAddress() mengembalikan format XX:XX:XX:XX:XX:XX uppercase
+  g_macAddress.toUpperCase();
 
-  // Sambung WiFi
-  Serial.printf("\nMenyambung ke %s", WIFI_SSID);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 30) {
-    delay(500);
-    Serial.print(".");
-    attempts++;
-  }
-
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.printf("\nTerhubung! IP: %s\n", WiFi.localIP().toString().c_str());
-  } else {
-    Serial.println("\nGagal terhubung WiFi — cek SSID/password di config.h");
-  }
+  Serial.println("\n╔══════════════════════════════╗");
+  Serial.println("║   SmartFarm IoT  v2.0.0      ║");
+  Serial.println("╚══════════════════════════════╝");
+  Serial.printf("MAC Address : %s\n", g_macAddress.c_str());
+  Serial.printf("Backend     : %s\n", API_BASE_URL);
+  Serial.println("-------------------------------");
+  Serial.println("Salin MAC address di atas ke dashboard untuk mendaftarkan device.");
+  Serial.println("-------------------------------\n");
 }
 
 // ── Loop ──────────────────────────────────────────────────────────────────────
-static unsigned long lastSend = 0;
+static unsigned long g_lastSend = 0;
 
 void loop() {
-  unsigned long now = millis();
+  // Pastikan WiFi terhubung
+  if (!connectWiFi()) {
+    delay(5000);
+    return;
+  }
 
-  if (now - lastSend >= SEND_INTERVAL_MS) {
-    lastSend = now;
+  // Provision jika belum atau setelah 403
+  if (!g_provisioned) {
+    g_provisioned = provision();
+    if (!g_provisioned) return;  // provision() sudah delay di dalam
+  }
+
+  // Kirim data setiap SEND_INTERVAL_MS
+  unsigned long now = millis();
+  if (now - g_lastSend >= SEND_INTERVAL_MS) {
+    g_lastSend = now;
 
     float soil  = readSoilMoisture();
     float water = readWaterLevelCm();
 
-    Serial.printf("[SENSOR] Kelembapan: %.1f%% | Ketinggian air: %.1f cm\n",
-      soil, water);
-
-    if (water < 0) {
-      Serial.println("[SENSOR] HC-SR04 timeout — periksa kabel ECHO");
+    if (water < 0.0f) {
+      Serial.println("[SENSOR] HC-SR04 timeout — periksa kabel ECHO dan voltage divider");
+      water = 0.0f;
     }
 
-    sendSensorData(soil, water < 0 ? 0.0 : water);
+    sendSensorData(soil, water);
     pollCommands();
   }
 }
