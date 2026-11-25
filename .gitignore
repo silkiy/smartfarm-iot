@@ -50,3 +50,6 @@ design
 # Browser test artifacts
 /playwright-report/
 /test-results/
+
+# Firmware secrets
+/firmware/config.h
