@@ -1,0 +1,38 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# env files
+.env*
+!.env.example
+
+# misc
+.DS_Store
+*.pem
+*.tsbuildinfo
+next-env.d.ts
+
+# vercel
+.vercel
+
+# test artifacts
+/playwright-report/
+/test-results/
+
+# firmware secrets
+/firmware/config.h
+
+# local docs
+/design/
+/docs/
+/prd/
+/tasks/
+AGENTS.md
