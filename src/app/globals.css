@@ -7,6 +7,7 @@
   --line: #dcdcd5;
   --accent: #1f6b46;
   --accent-foreground: #f4faf6;
+  --error: #b3261e;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -17,6 +18,7 @@
     --line: #2b302e;
     --accent: #63c08f;
     --accent-foreground: #0c1a12;
+    --error: #f2b8b5;
   }
 }
 
@@ -27,6 +29,7 @@
   --color-line: var(--line);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-error: var(--error);
   --font-sans: var(--font-plus-jakarta);
 }
 

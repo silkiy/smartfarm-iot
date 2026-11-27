@@ -66,14 +66,14 @@
 **Description:** Mengimplementasikan alur registrasi pengguna baru secara vertikal: skema Zod input registrasi, hashing password (mis. `bcryptjs` / `argon2`), penyimpanan user baru ke koleksi `users` dengan default role `USER`, dan halaman UI `/register`.
 
 **Acceptance criteria:**
-- [ ] Email duplikat ditolak dengan pesan error jelas (HTTP `409` / pesan form).
-- [ ] Password disimpan sebagai hash (tidak pernah plain-text) dan role selalu di-set `USER` oleh server (mengabaikan input role dari client).
-- [ ] Pengguna dapat mengisi form `/register` dan diarahkan ke `/login` setelah berhasil.
+- [x] Email duplikat ditolak dengan pesan error jelas (HTTP `409` / pesan form).
+- [x] Password disimpan sebagai hash (tidak pernah plain-text) dan role selalu di-set `USER` oleh server (mengabaikan input role dari client).
+- [x] Pengguna dapat mengisi form `/register` dan diarahkan ke `/login` setelah berhasil. (Redirect ditulis; end-to-end baru setelah Task 4.)
 
 **Verification:**
-- [ ] Tests pass: `npm test -- register`
-- [ ] Build succeeds: `npm run build`
-- [ ] Manual check: Daftar akun baru via `/register` dan cek dokumen di koleksi `users`
+- [x] Tests pass: `npm test -- register`
+- [x] Build succeeds: `npm run build`
+- [x] Manual check: Daftar akun baru via `/register` dan cek dokumen di koleksi `users` (scratch db `cp2_scratch`; dibersihkan; bukan DB produksi)
 
 **Dependencies:** Task 2
 
@@ -91,14 +91,14 @@
 **Description:** Mengonfigurasi Auth.js v5 dengan Credentials Provider untuk memverifikasi email & password dari MongoDB, menyertakan `id` dan `role` pada JWT/session callback, serta membangun halaman UI `/login`.
 
 **Acceptance criteria:**
-- [ ] Login dengan kredensial valid membuat sesi yang menyimpan `session.user.id` dan `session.user.role`.
-- [ ] Login dengan email/password salah menampilkan pesan error generik tanpa membocorkan detail akun.
-- [ ] Halaman `/login` berhasil mengarahkan user terautentikasi ke `/dashboard`.
+- [x] Login dengan kredensial valid membuat sesi yang menyimpan `session.user.id` dan `session.user.role`.
+- [x] Login dengan email/password salah menampilkan pesan error generik tanpa membocorkan detail akun.
+- [x] Halaman `/login` berhasil mengarahkan user terautentikasi ke `/dashboard`. (redirect `/dashboard`; page minimal + Task 5; tidak Task 15)
 
 **Verification:**
-- [ ] Tests pass: `npm test -- auth-login`
-- [ ] Build succeeds: `npm run build`
-- [ ] Manual check: Login via `/login`, verifikasi cookie sesi aktif dan data user tampil
+- [x] Tests pass: `npm test -- auth-login`
+- [x] Build succeeds: `npm run build`
+- [x] Manual check: Login via `/login`, verifikasi cookie sesi aktif dan data user tampil (e2e `scripts/verify-checkpoint2.mts`)
 
 **Dependencies:** Task 3
 
@@ -116,14 +116,14 @@
 **Description:** Menambahkan middleware Next.js untuk melindungi seluruh rute `/dashboard/*`, serta helper server-side untuk memeriksa sesi dan membatasi akses berdasarkan kepemilikan (`ownerId`) atau peran `ADMIN`.
 
 **Acceptance criteria:**
-- [ ] Akses ke `/dashboard` atau `/dashboard/*` tanpa sesi aktif otomatis dialihkan ke `/login`.
-- [ ] Pengguna yang sudah login saat membuka `/login` atau `/register` dialihkan ke `/dashboard`.
-- [ ] Helper otorisasi (`requireSession`, `requireDeviceAccess`, `requireAdmin`) menolak akses lintas user (`403`) dan non-admin (`403`).
+- [x] Akses ke `/dashboard` atau `/dashboard/*` tanpa sesi aktif otomatis dialihkan ke `/login`.
+- [x] Pengguna yang sudah login saat membuka `/login` atau `/register` dialihkan ke `/dashboard`.
+- [x] Helper otorisasi (`requireSession`, `requireDeviceAccess`, `requireAdmin`) menolak akses lintas user (`403`) dan non-admin (`403`).
 
 **Verification:**
-- [ ] Tests pass: `npm test -- rbac`
-- [ ] Build succeeds: `npm run build`
-- [ ] Manual check: Buka `/dashboard` dalam mode incognito → ter-redirect ke `/login`
+- [x] Tests pass: `npm test -- rbac`
+- [x] Build succeeds: `npm run build`
+- [x] Manual check: Buka `/dashboard` dalam mode incognito → ter-redirect ke `/login`
 
 **Dependencies:** Task 4
 
@@ -137,9 +137,9 @@
 ---
 
 ### Checkpoint 2: Autentikasi & Proteksi Rute
-- [ ] `npm test`, `npm run lint`, dan `npm run build` lulus
-- [ ] Alur `/register` → `/login` → `/dashboard` dan redirect non-login berjalan end-to-end
-- [ ] Review bersama user sebelum masuk ke manajemen perangkat
+- [x] `npm test`, `npm run lint`, dan `npm run build` lulus
+- [x] Alur `/register` → `/login` → `/dashboard` dan redirect non-login berjalan end-to-end (`scripts/verify-checkpoint2.mts`, scratch db, 20/20)
+- [x] Review bersama user sebelum masuk ke manajemen perangkat (user meminta & mendelegasikan penyelesaian Checkpoint 2; tidak ada log review terpisah)
 
 ---
 
