@@ -80,5 +80,18 @@ main()
     process.exitCode = 1;
   })
   .finally(async () => {
-    await closeMongoClient();
+    // Closing the client must not mask an earlier failure or crash the CLI
+    // with an unhandled rejection on Node 25.
+    try {
+      await closeMongoClient();
+    } catch (error: unknown) {
+      console.error(
+        JSON.stringify({
+          level: "error",
+          message: "closing MongoClient failed",
+          timestamp: new Date().toISOString(),
+          error: error instanceof Error ? error.message : String(error),
+        }),
+      );
+    }
   });

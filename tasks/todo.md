@@ -56,9 +56,9 @@
 ---
 
 ### Checkpoint 1: Foundation
-- [ ] `npm run lint`, `npm test`, dan `npm run build` lulus tanpa error
-- [ ] Koneksi MongoDB Atlas dan script `ensure-indexes.ts` terverifikasi
-- [ ] Review struktur dasar bersama user sebelum lanjut ke Auth
+- [x] `npm run lint`, `npm test`, dan `npm run build` lulus tanpa error
+- [x] Koneksi MongoDB Atlas dan script `ensure-indexes.ts` terverifikasi
+- [x] Review struktur dasar bersama user sebelum lanjut ke Auth
 
 ---
 
