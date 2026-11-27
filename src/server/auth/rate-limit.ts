@@ -1,4 +1,3 @@
-import "server-only";
 import { getMongoDatabase } from "@/server/db/mongodb";
 
 const MAX_ATTEMPTS = 10;
