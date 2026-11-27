@@ -33,5 +33,11 @@ export async function ensureIndexes(db: Db): Promise<void> {
         { expiresAt: 1 },
         { expireAfterSeconds: 0, name: "auth_attempts_ttl" },
       ),
+    db
+      .collection("auth_attempts")
+      .createIndex(
+        { username: 1, createdAt: 1 },
+        { name: "auth_attempts_username_time" },
+      ),
   ]);
 }

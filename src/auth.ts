@@ -4,7 +4,13 @@ import Credentials from "next-auth/providers/credentials";
 import { loginSchema } from "@/domain/auth";
 import { verifyPassword } from "@/server/auth/passwords";
 import { getMongoDatabase } from "@/server/db/mongodb";
+import { checkRateLimit, clearAttempts } from "@/server/auth/rate-limit";
 import type { ProfileDocument } from "@/domain/models";
+
+// Dummy hash untuk timing parity saat username tidak ditemukan.
+// Mencegah attacker membedakan "username tidak ada" vs "password salah"
+// berdasarkan response time (bcrypt ~100-200ms vs ~1ms).
+const DUMMY_HASH = "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/VK8e1A6Iy";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -17,22 +23,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
 
+        const { username, password } = parsed.data;
+
+        // Cek rate limit sebelum query DB
+        const allowed = await checkRateLimit(username);
+        if (!allowed) return null;
+
         const db = await getMongoDatabase();
         const profile = await db
           .collection<ProfileDocument>("profiles")
-          .findOne({ username: parsed.data.username, isActive: true });
+          .findOne({ username, isActive: true });
 
-        if (!profile) return null;
+        // Timing parity: selalu jalankan bcrypt meski user tidak ada
+        const hash = profile?.passwordHash ?? DUMMY_HASH;
+        const valid = await verifyPassword(password, hash);
 
-        const valid = await verifyPassword(parsed.data.password, profile.passwordHash);
-        if (!valid) return null;
+        if (!profile || !valid) return null;
+
+        // Login berhasil — hapus attempt counter
+        await clearAttempts(username);
 
         return {
           id: profile.userId,
           username: profile.username,
           name: profile.displayName,
           role: profile.role,
-          sessionVersion: profile.sessionVersion ?? 0,
+          sessionVersion: profile.sessionVersion,
         };
       },
     }),
@@ -50,18 +66,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      // Verifikasi sessionVersion masih valid
       const db = await getMongoDatabase();
-      const profile = await db
-        .collection<ProfileDocument>("profiles")
-        .findOne({ userId: token.id as string });
+      const profile = await db.collection<ProfileDocument>("profiles").findOne(
+        { userId: token.id as string },
+        {
+          projection: { sessionVersion: 1, isActive: 1, _id: 0 },
+        },
+      );
 
       if (
         !profile ||
         !profile.isActive ||
-        (profile.sessionVersion ?? 0) !== token.sessionVersion
+        profile.sessionVersion !== token.sessionVersion
       ) {
-        // Session tidak valid — paksa logout
         return { ...session, user: undefined as unknown as typeof session.user };
       }
 

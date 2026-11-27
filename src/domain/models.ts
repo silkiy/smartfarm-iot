@@ -27,7 +27,8 @@ export interface ProfileDocument extends BaseDocument {
   role: UserRole;
   isActive: boolean;
   passwordHash: string;
-  sessionVersion?: number;
+  /** Dinaikkan setiap reset password atau deaktivasi — revoke semua sesi lama */
+  sessionVersion: number;
 }
 
 export interface DeviceDocument extends BaseDocument {
