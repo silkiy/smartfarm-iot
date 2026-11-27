@@ -14,7 +14,12 @@ function isDuplicateKeyError(error: unknown): boolean {
 
 export async function POST(request: Request): Promise<Response> {
   // Auth first (AGENT.md §11.3 / §12.1). No ownership input is trusted.
-  const session = await requireSession();
+  let session: Awaited<ReturnType<typeof requireSession>>;
+  try {
+    session = await requireSession();
+  } catch {
+    return apiFailure("UNAUTHORIZED", "Authentication required", 401);
+  }
 
   let rawBody: unknown;
   try {

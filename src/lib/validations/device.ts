@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { MAC_ADDRESS_REGEX } from "@/lib/crypto";
 
+/** Path `deviceId` validation (AGENT.md §11.2). Only validated scalar reaches Mongo. */
+export const deviceIdParamSchema = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/, { error: "ID perangkat tidak valid" });
+
 /**
  * Create-device input. Unknown keys (including client `ownerId`, `apiKeyHash`,
  * `role`, `mode`, `apiKey`, ...) are stripped; the server always sets
@@ -9,11 +12,7 @@ import { MAC_ADDRESS_REGEX } from "@/lib/crypto";
  */
 export const createDeviceSchema = z.object({
   name: z.string().trim().min(1, { error: "Nama perangkat wajib diisi" }).max(100),
-  deviceId: z
-    .string()
-    .trim()
-    .regex(/^[A-Za-z0-9_-]{1,64}$/, { error: "ID perangkat hanya huruf/angka/-/_ (1-64)" })
-    .optional(),
+  deviceId: deviceIdParamSchema.optional(),
   macAddress: z.string().trim().regex(MAC_ADDRESS_REGEX, { error: "Format MAC harus AA:BB:CC:DD:EE:FF" }),
 });
 
