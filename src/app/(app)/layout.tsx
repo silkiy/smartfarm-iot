@@ -1,10 +1,14 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { AppShell } from "@/components/layout/app-shell";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  // AppShell akan ditambahkan di Slice 2
-  return <>{children}</>;
+  return (
+    <AppShell user={{ name: session.user.name ?? session.user.username }}>
+      {children}
+    </AppShell>
+  );
 }
