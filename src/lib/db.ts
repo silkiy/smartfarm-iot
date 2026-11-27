@@ -17,7 +17,7 @@ type MongoGlobal = typeof globalThis & {
 };
 
 function getGlobalStore(): MongoGlobal {
-  return globalThis as MongoGlobal;
+  return globalThis;
 }
 
 export function getMongoClient(): Promise<MongoClient> {
