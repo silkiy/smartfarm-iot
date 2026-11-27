@@ -73,7 +73,7 @@
 **Verification:**
 - [x] Tests pass: `npm test -- register`
 - [x] Build succeeds: `npm run build`
-- [ ] Manual check: Daftar akun baru via `/register` dan cek dokumen di koleksi `users` (tidak dijalankan terhadap DB produksi; D11; pakai database scratch)
+- [x] Manual check: Daftar akun baru via `/register` dan cek dokumen di koleksi `users` (scratch db `cp2_scratch`; dibersihkan; bukan DB produksi)
 
 **Dependencies:** Task 2
 
@@ -98,7 +98,7 @@
 **Verification:**
 - [x] Tests pass: `npm test -- auth-login`
 - [x] Build succeeds: `npm run build`
-- [ ] Manual check: Login via `/login`, verifikasi cookie sesi aktif dan data user tampil
+- [x] Manual check: Login via `/login`, verifikasi cookie sesi aktif dan data user tampil (e2e `scripts/verify-checkpoint2.mts`)
 
 **Dependencies:** Task 3
 
@@ -137,8 +137,8 @@
 ---
 
 ### Checkpoint 2: Autentikasi & Proteksi Rute
-- [ ] `npm test`, `npm run lint`, dan `npm run build` lulus
-- [ ] Alur `/register` → `/login` → `/dashboard` dan redirect non-login berjalan end-to-end
+- [x] `npm test`, `npm run lint`, dan `npm run build` lulus
+- [x] Alur `/register` → `/login` → `/dashboard` dan redirect non-login berjalan end-to-end (`scripts/verify-checkpoint2.mts`, scratch db, 20/20)
 - [ ] Review bersama user sebelum masuk ke manajemen perangkat
 
 ---
