@@ -8,7 +8,7 @@ export async function ensureIndexes(db: Db): Promise<void> {
       .createIndex({ userId: 1 }, { unique: true, name: "profiles_userId" }),
     db
       .collection(collectionNames.profiles)
-      .createIndex({ email: 1 }, { unique: true, name: "profiles_email" }),
+      .createIndex({ username: 1 }, { unique: true, name: "profiles_username" }),
     db
       .collection(collectionNames.devices)
       .createIndex({ macAddress: 1 }, { unique: true, name: "devices_mac" }),

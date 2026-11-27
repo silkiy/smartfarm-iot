@@ -22,7 +22,7 @@ export interface BaseDocument {
 
 export interface ProfileDocument extends BaseDocument {
   userId: string;
-  email: string;
+  username: string;
   displayName: string;
   role: UserRole;
   isActive: boolean;
