@@ -53,7 +53,7 @@ export default function HomePage() {
       <section aria-labelledby="kemampuan" className="flex flex-col gap-4">
         <h2
           id="kemampuan"
-          className="text-sm font-semibold uppercase tracking-wider text-foreground/60"
+          className="text-sm font-semibold uppercase tracking-wider text-foreground/70"
         >
           Yang dijaga sistem
         </h2>
@@ -72,7 +72,7 @@ export default function HomePage() {
         </ul>
       </section>
 
-      <footer className="mt-auto border-t border-line pt-6 text-sm text-foreground/60">
+      <footer className="mt-auto border-t border-line pt-6 text-sm text-foreground/70">
         Sistem Informasi, Universitas Internasional Semen Indonesia.
       </footer>
     </main>
