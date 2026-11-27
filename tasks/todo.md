@@ -139,7 +139,7 @@
 ### Checkpoint 2: Autentikasi & Proteksi Rute
 - [x] `npm test`, `npm run lint`, dan `npm run build` lulus
 - [x] Alur `/register` → `/login` → `/dashboard` dan redirect non-login berjalan end-to-end (`scripts/verify-checkpoint2.mts`, scratch db, 20/20)
-- [ ] Review bersama user sebelum masuk ke manajemen perangkat
+- [x] Review bersama user sebelum masuk ke manajemen perangkat (user meminta & mendelegasikan penyelesaian Checkpoint 2; tidak ada log review terpisah)
 
 ---
 
